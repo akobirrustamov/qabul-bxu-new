@@ -132,6 +132,10 @@ function Directions() {
         null,
         true
       );
+
+      if (response.data?.phone!==phone){
+        alert(`Kiritilgan pasport ma'lumotlari oldin ro'yxatdan o'tgan. Bog'langan telefon raqami: ${response.data.phone}`);
+      }
       getPhoneData(response);
       // navigate("/data-form", { state: phone });
     } catch (error) {

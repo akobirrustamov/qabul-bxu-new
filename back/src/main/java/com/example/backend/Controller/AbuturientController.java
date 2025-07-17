@@ -215,7 +215,7 @@ public class AbuturientController {
         }
         Optional<Abuturient> abuturient1 = abuturientRepo.findByAbuturientByJshshR(request.getPassportPin());
         if (abuturient1.isPresent()) {
-            return ResponseEntity.ok(abuturient1);
+            return ResponseEntity.ok(abuturient1.get());
         }
         if (abuturient.getStatus() == 0) {
             District district = null;
