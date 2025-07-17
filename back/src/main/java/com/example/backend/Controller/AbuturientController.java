@@ -53,7 +53,6 @@ public class AbuturientController {
     private static final String AMO_DOMAIN = "buxpxticrm.amocrm.ru";
     private static final String TOKEN_PATH = "./tokens.json";
     private final AbuturientAmocrmRepo abuturientAmocrmRepo;
-
     RestTemplate restTemplate = new RestTemplate(
             new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault())
     );

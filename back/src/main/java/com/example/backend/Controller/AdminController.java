@@ -14,21 +14,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -243,6 +239,45 @@ public class AdminController {
             return ResponseEntity.badRequest().body("Ball 0 dan katta va 189 dan kichik bo‘lishi kerak.");
         }
 
+        System.out.printf("abuturient: %s\n", abuturient);
+
+        if (ball > 56) {
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                String email = "akobirjavadev10@gmail.com";
+                String password = "qCfkQTHQbQAJLJeElWWI9bv1stjoh3Unt6dNiE04";
+                String loginUrl = "https://notify.eskiz.uz/api/auth/login";
+
+                Map<String, String> loginPayload = new HashMap<>();
+                loginPayload.put("email", email);
+                loginPayload.put("password", password);
+
+                Map loginResponse = restTemplate.postForObject(loginUrl, loginPayload, Map.class);
+                token = (String) ((Map) loginResponse.get("data")).get("token");
+
+
+                String templateUrl = "https://notify.eskiz.uz/api/user/templates";
+                HttpEntity<Void> entity = new HttpEntity<>(createHeaders(token));
+                Map templatesResponse = restTemplate.exchange(templateUrl, HttpMethod.GET, entity, Map.class).getBody();
+                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(0)).get("template");
+                System.out.printf("template: %s\n", template);
+                String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + abuturient.getPhone();
+                String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", "+998553099999");
+                System.out.printf("finalMessage: %s\n", finalMessage);
+                String smsUrl = "https://notify.eskiz.uz/api/message/sms/send";
+                Map<String, String> smsPayload = new HashMap<>();
+                smsPayload.put("mobile_phone", abuturient.getPhone());
+                smsPayload.put("message", finalMessage);
+                smsPayload.put("from", "4546");
+
+                HttpEntity<Map<String, String>> smsEntity = new HttpEntity<>(smsPayload, createHeaders(token));
+                restTemplate.postForObject(smsUrl, smsEntity, Map.class);
+                System.out.printf("sms: %s\n", smsEntity);
+            } catch (Exception e) {
+                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
 
         abuturient.setBall(ball.toString());
         abuturient.setGetContract(true);
@@ -252,6 +287,11 @@ public class AdminController {
 
         return ResponseEntity.ok("Ball muvaffaqiyatli yangilandi.");
     }
-
+    private HttpHeaders createHeaders(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
 
 }

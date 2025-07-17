@@ -12,10 +12,9 @@ import com.example.backend.Repository.TestSubjectRepo;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
@@ -30,7 +29,6 @@ public class TestController {
     private final AbuturientRepo abuturientRepo;
     private final TestSubjectRepo testSubjectRepo;
     private final TestScoreRepo testScoreRepo;
-
     @GetMapping("/add/update")
     public HttpEntity<?> addOrUpdateTests() {
 //        String filePath = System.getProperty("user.home") + "/Downloads/test.xlsx";
@@ -130,27 +128,76 @@ public class TestController {
     @PostMapping("/result/{phone}")
     public HttpEntity<?> setTestScore(@RequestBody TestScoreDTO testScoreDTO, @PathVariable String phone) {
         Abuturient abiturient = abuturientRepo.findByPhone(phone);
-        System.out.println(testScoreDTO);
         if (abiturient == null) {
             return new ResponseEntity<>("Phone not found", HttpStatus.NOT_FOUND);
         }
 
+        double showScore;
+        try {
+            showScore = Double.parseDouble(testScoreDTO.getShowScore().replace(",", "."));
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>("Invalid score format", HttpStatus.BAD_REQUEST);
+        }
+
+        if (showScore > 56) {
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                String email = "akobirjavadev10@gmail.com";
+                String password = "qCfkQTHQbQAJLJeElWWI9bv1stjoh3Unt6dNiE04";
+                String loginUrl = "https://notify.eskiz.uz/api/auth/login";
+
+                Map<String, String> loginPayload = new HashMap<>();
+                loginPayload.put("email", email);
+                loginPayload.put("password", password);
+
+                Map loginResponse = restTemplate.postForObject(loginUrl, loginPayload, Map.class);
+                String token = (String) ((Map) loginResponse.get("data")).get("token");
+
+                String templateUrl = "https://notify.eskiz.uz/api/user/templates";
+                HttpEntity<Void> entity = new HttpEntity<>(createHeaders(token));
+                Map templatesResponse = restTemplate.exchange(templateUrl, HttpMethod.GET, entity, Map.class).getBody();
+                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(0)).get("template");
+
+                String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + phone;
+                String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", phone);
+
+                String smsUrl = "https://notify.eskiz.uz/api/message/sms/send";
+                Map<String, String> smsPayload = new HashMap<>();
+                smsPayload.put("mobile_phone", abiturient.getPhone());
+                smsPayload.put("message", finalMessage);
+                smsPayload.put("from", "4546");
+
+                HttpEntity<Map<String, String>> smsEntity = new HttpEntity<>(smsPayload, createHeaders(token));
+                restTemplate.postForObject(smsUrl, smsEntity, Map.class);
+
+            } catch (Exception e) {
+                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
         TestScore testScore = testScoreRepo.findByAbuturientId(abiturient.getId());
-        testScore.setScore(testScoreDTO.getShowScore());
-        testScore.setRightScore(testScoreDTO.getScore());
+        if (testScore == null) {
+            testScore = new TestScore(abiturient, testScoreDTO.getShowScore(), testScoreDTO.getScore(), null, 0);
+        } else {
+            testScore.setScore(testScoreDTO.getShowScore());
+            testScore.setRightScore(testScoreDTO.getScore());
+        }
         testScoreRepo.save(testScore);
+
         abiturient.setStatus(3);
         abiturient.setBall(testScoreDTO.getShowScore());
-        if (abiturient.getEducationField().getIjodiy()) {
-            abiturient.setGetContract(false);
-        } else {
-            abiturient.setGetContract(true);
-        }
+        abiturient.setGetContract(!abiturient.getEducationField().getIjodiy());
         abuturientRepo.save(abiturient);
 
         return new ResponseEntity<>("Score updated successfully", HttpStatus.OK);
     }
 
+    private HttpHeaders createHeaders(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
     @GetMapping("/score/{phone}")
     public HttpEntity<?> getTestScore(@PathVariable("phone") String phone) {
         TestScore testScore = testScoreRepo.findByAbuturientId(abuturientRepo.findByPhone(phone).getId());
