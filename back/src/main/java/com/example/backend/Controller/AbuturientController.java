@@ -213,6 +213,10 @@ public class AbuturientController {
         if (Objects.isNull(abuturient)) {
             return ResponseEntity.ok(null);
         }
+        Optional<Abuturient> abuturient1 = abuturientRepo.findByAbuturientByJshshR(request.getPassportPin());
+        if (abuturient1.isPresent()) {
+            return ResponseEntity.ok(abuturient1);
+        }
         if (abuturient.getStatus() == 0) {
             District district = null;
             Optional<District> byId = districtRepo.findById(request.getDistrictId());
