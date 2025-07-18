@@ -272,6 +272,8 @@ public class AdminController {
 
                 HttpEntity<Map<String, String>> smsEntity = new HttpEntity<>(smsPayload, createHeaders(token));
                 restTemplate.postForObject(smsUrl, smsEntity, Map.class);
+
+                System.out.println(restTemplate);
                 System.out.printf("sms: %s\n", smsEntity);
             } catch (Exception e) {
                 return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
