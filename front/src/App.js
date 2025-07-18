@@ -14,6 +14,8 @@ import EducationExam from "./pages/educationExam/EducationExam";
 import EducationOffer from "./pages/educationOffer/EducationOffer";
 import EducationSocial from "./pages/educationSocial/EducationSocial";
 import EducationPrize from "./pages/educationPrize/EducationPrize";
+
+// admin pages
 import LoginAdmin from "./admin/LoginAdmin";
 import EducationForm from "./admin/myPages/EducationForm";
 import ForeignForm from "./pages/home/ForeignForm";
@@ -23,6 +25,20 @@ import MyAppeals from "./admin/myPages/Appeals";
 import MyPagesTransformEducation from "./admin/myPages/Transform";
 import AdminHome from "./admin/myPages/AdminHome";
 import MyPagesHistory from "./admin/myPages/History";
+
+// worker roels
+import EducationFormWorker from "./admin/Akobir/EducationForm";
+import ForeignFormWorker from "./pages/home/ForeignForm";
+import EducationFieldWorker from "./admin/Akobir/EducationField";
+import EducationTypeWorker from "./admin/Akobir/EducationType";
+import MyAppealsWorker from "./admin/Akobir/Appeals";
+import MyPagesTransformEducationWorker from "./admin/Akobir/Transform";
+import AdminHomeWorker from "./admin/Akobir/AdminHome";
+import MyPagesHistoryWorker from "./admin/Akobir/History";
+import MyQRCodeWorker from "./admin/Akobir/MyQRCode";
+import SettingsWorker from "./admin/Akobir/Settings";
+import StaffWorker from "./admin/Akobir/Staff";
+import SocialMediaWorker from "./admin/Akobir/SocialMedia";
 // app admin
 import AdminHomeUser from "./admin/admin/AdminHome";
 import AgentList from "./admin/admin/AgentList";
@@ -61,9 +77,9 @@ function App() {
   async function checkSecurity() {
     if (location.pathname === "/admin/login") return;
     if (
-      blockedPages.some((blockedPage) =>
-        location.pathname.startsWith(blockedPage)
-      )
+        blockedPages.some((blockedPage) =>
+            location.pathname.startsWith(blockedPage)
+        )
     ) {
       let accessToken = localStorage.getItem("access_token");
       const res = await ApiCall("/api/v1/security", "GET");
@@ -83,76 +99,101 @@ function App() {
   }
 
   return (
-    <div>
-      <Routes>
-        <Route path={"/:agentId"} element={<Home />} />
-        <Route path={"/"} element={<Home />} />
-        <Route path={"/card/:cardId"} element={<GoldCard />} />
-        <Route path={"/user-info"} element={<Directions />} />
-        <Route path={"/data-form"} element={<DataForm />} />
-        <Route path={"/cabinet"} element={<Kabinet />} />
-        <Route path={"/test"} element={<TestAbuturient />} />
-        <Route path={"/result"} element={<Result />} />
-        <Route path={"/education-type"} element={<EducationTypeInstitute />} />
-        <Route path={"/education-exam"} element={<EducationExam />} />
-        <Route path={"/education-offer"} element={<EducationOffer />} />
-        <Route path={"/data-form-foreign"} element={<ForeignForm />} />
+      <div>
+        <Routes>
+          <Route path={"/:agentId"} element={<Home />} />
+          <Route path={"/"} element={<Home />} />
+          <Route path={"/card/:cardId"} element={<GoldCard />} />
+          <Route path={"/user-info"} element={<Directions />} />
+          <Route path={"/data-form"} element={<DataForm />} />
+          <Route path={"/cabinet"} element={<Kabinet />} />
+          <Route path={"/test"} element={<TestAbuturient />} />
+          <Route path={"/result"} element={<Result />} />
+          <Route path={"/education-type"} element={<EducationTypeInstitute />} />
+          <Route path={"/education-exam"} element={<EducationExam />} />
+          <Route path={"/education-offer"} element={<EducationOffer />} />
+          <Route path={"/data-form-foreign"} element={<ForeignForm />} />
 
-        {/* <Route path={"/education-social"} element={<EducationSocial />} />
+          {/* <Route path={"/education-social"} element={<EducationSocial />} />
         <Route path={"/education-prize"} element={<EducationPrize />} /> */}
+          {/* admin full */}
+          <Route path={"/main"} element={<AdminHomeWorker />} />
+          <Route path={"/main/appeal"} element={<MyAppealsWorker />} />
+          <Route
+              path={"/main/transform-education"}
+              element={<MyPagesTransformEducationWorker />}
+          />
+          <Route path={"/main/qr-code"} element={<MyQRCodeWorker />} />
+          <Route path={"/main/settings"} element={<SettingsWorker />} />
+          <Route path={"/main/staff"} element={<StaffWorker />} />
+          <Route
+              path={"/main/education-socialMedia"}
+              element={<SocialMediaWorker />}
+          />
+          <Route path={"/main/education-form"} element={<EducationFormWorker />} />
+          <Route
+              path={"/main/education-field"}
+              element={<EducationFieldWorker />}
+          />
+          <Route path={"/main/historyWorker"} element={<MyPagesHistoryWorker />} />
+          <Route path={"/main/education-type"} element={<EducationTypeWorker />} />
+          <Route path={"/main/MyQRCode"} element={<MyQRCodeWorker />} />
+          <Route path={"/main/staffWorker"} element={<StaffWorker />} />
+          <Route path={"/main/socialMediaWorker"} element={<SocialMediaWorker />} />
+          <Route path={"/main/settingsWorker"} element={<SettingsWorker />} />
+          {/* generator */}
+          <Route path={"/admin/login"} element={<LoginAdmin />} />
+          <Route path={"/dashboard"} element={<AdminHome />} />
+          <Route path={"/dashboard/appeal"} element={<MyAppeals />} />
+          <Route
+              path={"/dashboard/transform-education"}
+              element={<MyPagesTransformEducation />}
+          />
+          <Route path={"/dashboard/qr-code"} element={<MyQRCode />} />
+          <Route path={"/dashboard/settings"} element={<Settings />} />
+          <Route path={"/dashboard/staff"} element={<Staff />} />
+          <Route
+              path={"/dashboard/education-socialMedia"}
+              element={<SocialMedia />}
+          />
+          <Route path={"/dashboard/education-form"} element={<EducationForm />} />
+          <Route
+              path={"/dashboard/education-field"}
+              element={<EducationField />}
+          />
+          <Route path={"/dashboard/history"} element={<MyPagesHistory />} />
+          <Route path={"/dashboard/education-type"} element={<EducationType />} />
+          <Route path={"/*"} element={<PageNotFound />} />
 
-        <Route path={"/admin/login"} element={<LoginAdmin />} />
-        <Route path={"/dashboard"} element={<AdminHome />} />
-        <Route path={"/dashboard/appeal"} element={<MyAppeals />} />
-        <Route
-          path={"/dashboard/transform-education"}
-          element={<MyPagesTransformEducation />}
-        />
-        <Route path={"/dashboard/qr-code"} element={<MyQRCode />} />
-        <Route path={"/dashboard/settings"} element={<Settings />} />
-        <Route path={"/dashboard/staff"} element={<Staff />} />
-        <Route
-          path={"/dashboard/education-socialMedia"}
-          element={<SocialMedia />}
-        />
-        <Route path={"/dashboard/education-form"} element={<EducationForm />} />
-        <Route
-          path={"/dashboard/education-field"}
-          element={<EducationField />}
-        />
-        <Route path={"/dashboard/history"} element={<MyPagesHistory />} />
-        <Route path={"/dashboard/education-type"} element={<EducationType />} />
-        <Route path={"/*"} element={<PageNotFound />} />
-
-        {/*  app admins */}
-        <Route path={"/admin/home"} element={<AdminHomeUser />} />
-        <Route path={"/admin/agent"} element={<AgentList />} />
-        <Route path={"/admin/operator"} element={<Operators />} />
-        <Route path={"/admin/appeal"} element={<Appeals />} />
-        <Route path={"/admin/history"} element={<AdminHistory />} />
-        <Route
-          path={"/admin/transform-education"}
-          element={<AdminTransformEducation />}
-        />
-        {/*  app admins */}
-        <Route path={"/manager/home"} element={<AdminHomeUserManager />} />
-        <Route path={"/manager/agent"} element={<AgentListManager />} />
-        <Route path={"/manager/operator"} element={<OperatorsManager />} />
-        <Route path={"/manager/appeal"} element={<AppealsManager />} />
-        <Route path={"/manager/transform-education"} element={<ManagerTransformEducation />} />
-        <Route path={"/manager/history"} element={<ManagerHistory />} />
-        {/*agent*/}
-        <Route path={"/agent/home"} element={<AdminHomeAgent />} />
-        <Route path={"/agent/vaucher"} element={<QRCodeAgent />} />
-        <Route path={"/agent/appeals"} element={<AppealsAgent />} />
-        <Route path={"/agent/history"} element={<AgentHistory />} />
-        <Route
-          path={"/agent/transform-education"}
-          element={<AgentTransformEducation />}
-        />
-        <Route path={"/agent/all-appeals"} element={<AllAppeals />} />
-      </Routes>
-    </div>
+          {/*  app admins */}
+          <Route path={"/admin/home"} element={<AdminHomeUser />} />
+          <Route path={"/admin/agent"} element={<AgentList />} />
+          <Route path={"/admin/operator"} element={<Operators />} />
+          <Route path={"/admin/appeal"} element={<Appeals />} />
+          <Route path={"/admin/history"} element={<AdminHistory />} />
+          <Route
+              path={"/admin/transform-education"}
+              element={<AdminTransformEducation />}
+          />
+          {/*  app admins */}
+          <Route path={"/manager/home"} element={<AdminHomeUserManager />} />
+          <Route path={"/manager/agent"} element={<AgentListManager />} />
+          <Route path={"/manager/operator"} element={<OperatorsManager />} />
+          <Route path={"/manager/appeal"} element={<AppealsManager />} />
+          <Route path={"/manager/transform-education"} element={<ManagerTransformEducation />} />
+          <Route path={"/manager/history"} element={<ManagerHistory />} />
+          {/*agent*/}
+          <Route path={"/agent/home"} element={<AdminHomeAgent />} />
+          <Route path={"/agent/vaucher"} element={<QRCodeAgent />} />
+          <Route path={"/agent/appeals"} element={<AppealsAgent />} />
+          <Route path={"/agent/history"} element={<AgentHistory />} />
+          <Route
+              path={"/agent/transform-education"}
+              element={<AgentTransformEducation />}
+          />
+          <Route path={"/agent/all-appeals"} element={<AllAppeals />} />
+        </Routes>
+      </div>
   );
 }
 

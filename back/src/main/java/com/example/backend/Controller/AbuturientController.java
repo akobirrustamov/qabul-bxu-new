@@ -71,14 +71,17 @@ public class AbuturientController {
     private final AgentPathRepo agentPathRepo;
     private final DistrictRepo districtRepo;
 
+    private final HistoryOfAbuturientRepo historyOfAbuturientRepo;
     private final HistoryRepo historyRepo;
     private final TestScoreRepo testScoreRepo;
     @DeleteMapping("/{abuturientId}")
     public HttpEntity<?> deleteAbuturient(@PathVariable UUID abuturientId) {
+        abuturientAmocrmRepo.deleteById(abuturientId);
+        historyOfAbuturientRepo.deleteByAbuturientId(abuturientId);
         historyRepo.deleteByAbuturientId(abuturientId);
         testScoreRepo.deleteByAbuturientId(abuturientId);
         abuturientRepo.deleteById(abuturientId);
-        return ResponseEntity.ok().build();
+        return new HttpEntity<>(HttpStatus.OK);
     }
 
 

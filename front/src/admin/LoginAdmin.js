@@ -66,6 +66,7 @@ const LoginAdmin = () => {
       // Show success toast
 
       // Navigate based on role
+
       if (roles[0].name === "ROLE_SUPER_ADMIN" && response.error === false) {
         setTimeout(() => navigate("/dashboard"), 500);
       } else if (roles[0].name === "ROLE_ADMIN" && response.error === false) {
@@ -77,6 +78,8 @@ const LoginAdmin = () => {
         response.error === false
       ) {
         setTimeout(() => navigate("/manager/home"), 500);
+      }else if (roles[0].name === "ROLE_WORKER" && response.error === false) {
+        setTimeout(() => navigate("/main"), 200);
       }
     } catch (error) {
       console.error("Login error:", error);
