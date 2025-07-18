@@ -71,8 +71,12 @@ public class AbuturientController {
     private final AgentPathRepo agentPathRepo;
     private final DistrictRepo districtRepo;
 
+    private final HistoryRepo historyRepo;
+    private final TestScoreRepo testScoreRepo;
     @DeleteMapping("/{abuturientId}")
     public HttpEntity<?> deleteAbuturient(@PathVariable UUID abuturientId) {
+        historyRepo.deleteByAbuturientId(abuturientId);
+        testScoreRepo.deleteByAbuturientId(abuturientId);
         abuturientRepo.deleteById(abuturientId);
         return ResponseEntity.ok().build();
     }

@@ -23,10 +23,9 @@ function TestAbiturient() {
     const [showTest, setShowTest] = useState(true);
     const location = useLocation();
     const [answers, setAnswers] = useState({});
-    const [correctCount, setCorrectCount] = useState(null);
+
     const [showConfetti, setShowConfetti] = useState(false);
     const [subjectNames, setSubjectNames] = useState([]);
-    const [totalScore, setTotalScore] = useState(null);
     const [formData, setFormData] = useState(null);
     const [failed, setFailed] = useState(false)
     const [certificate1, setCertificate1] = useState(null)
@@ -66,9 +65,7 @@ function TestAbiturient() {
         // fetchTestData();
     }, []);
 
-    useEffect(() => {
 
-    }, [correctCount]);
 
     useEffect(() => {
         checkIfAllQuestionsAnswered();
@@ -86,6 +83,7 @@ function TestAbiturient() {
                     setIjodiy(true);
                 }
                 if (response.data.status >= 3) {
+
                     setShowTest(false);
                     getScore();
                 } else {
@@ -110,7 +108,6 @@ function TestAbiturient() {
             if (response.data === null) {
                 navigate("/");
             } else if (response.data) {
-                setTotalScore(response.data?.score);
                 if (response.data?.score < 57) {
                     setFailed(true)
                 }
@@ -196,38 +193,50 @@ function TestAbiturient() {
                     : score;
             }, 0);
         };
+        // alert(JSON.stringify(subjects.subject1))
 
         const score1 = calculateScore(subjects.subject1, 2.2);
         const score2 = calculateScore(subjects.subject2, 2.2);
         const score3 = calculateScore(subjects.subject3, 2.2);
         const score4 = calculateScore(subjects.subject4, 6.3);
         const score5 = calculateScore(subjects.subject5, 9.3);
+        // alert(score1)
+        // alert(score2)
+        // alert(score3)
+        // alert(score4)
 
         let total = Number((score1 + score2 + score3 + score5 + score4).toFixed(1));
 
-        // Agar ball 56 dan past bo'lsa, 70-80 oralig'ida random ball generatsiya qilish
-        if (total < 57) {
-            total = Math.floor(Math.random() * 11) + 70; // 70-80 oralig'ida random son
-        }
+        // alert(total)
 
+
+        console.log(total)
         setShowTest(false);
+        if (total < 57) {
+            console.log(total)
+            console.log(total+40)
+            total = total+40; // 70-80 oralig'ida random son
+        }
         let finalScore = total;
 
+
         if (!ijodiy) {
-            if (total < 57) {
+            if (finalScore < 57) {
                 setFailed(true)
+
             } else {
                 setShowConfetti(true);
                 const timer = setTimeout(() => setShowConfetti(false), 7000);
+                // return () => clearTimeout(timer);
+
             }
         }
 
-        setCorrectCount(finalScore);
-        setTotalScore(finalScore);
         const resultData = {
-            score: parseFloat((total || 0).toFixed(1)),
+            score: parseFloat((finalScore || 0).toFixed(1)),
             showScore: parseFloat((finalScore || 0).toFixed(1)),
         };
+
 
         try {
             await ApiCall(`/api/v1/test/result/${phone}`, "POST", resultData, null, true);
@@ -237,6 +246,7 @@ function TestAbiturient() {
             console.error("Error submitting test data:", error);
         }
     };
+
     const handleDownloadPDF = async () => {
         setLoading(true); // Yuklash boshlanishida loading ni true qilamiz
         try {

@@ -171,7 +171,8 @@ public class TestController {
                 restTemplate.postForObject(smsUrl, smsEntity, Map.class);
 
             } catch (Exception e) {
-                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                System.out.printf("Error: %s", e.getMessage());
+//                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 

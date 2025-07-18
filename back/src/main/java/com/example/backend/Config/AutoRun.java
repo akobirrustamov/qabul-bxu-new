@@ -83,6 +83,16 @@ public class AutoRun implements CommandLineRunner {
                     .build();
             userRepo.save(ulug);
         }
+        Optional<User> man1 = userRepo.findByPhone("Akobir");
+        if(man1.isEmpty()){
+            User man = User.builder()
+                    .phone("Akobir")
+                    .name("Akobir")
+                    .password(passwordEncoder.encode("Akobir"))
+                    .roles(List.of(roleRepo.findByName(UserRoles.ROLE_WORKER)))
+                    .build();
+            userRepo.save(man);
+        }
     }
 
     private void saveAllRegions() {

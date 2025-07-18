@@ -10,4 +10,8 @@ import java.util.UUID;
 public interface TestScoreRepo extends JpaRepository<TestScore,Integer> {
     @Query(value = "select * from test_score where abuturient_id=:byPhone",  nativeQuery = true)
     TestScore findByAbuturientId(UUID byPhone);
+
+
+    @Query(value = "delete from test_score where abuturient_id=:abuturientId", nativeQuery = true)
+    void deleteByAbuturientId(UUID abuturientId);
 }

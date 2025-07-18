@@ -276,7 +276,8 @@ public class AdminController {
                 System.out.println(restTemplate);
                 System.out.printf("sms: %s\n", smsEntity);
             } catch (Exception e) {
-                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                System.out.printf("````\n%s```\n", e.getMessage());
+//                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
