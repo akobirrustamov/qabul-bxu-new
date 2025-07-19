@@ -13,6 +13,7 @@ function BgImage(props) {
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const [isDtm, setIsDtm] = useState(false);
 
   const handleClose = () => setOpen(false);
 
@@ -82,18 +83,16 @@ function BgImage(props) {
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const phoneRegex = /^\+998\d{9}$/;
     if (!phoneRegex.test(tel)) {
       setMessage("Telefon raqami noto'g'ri formatda!");
       setOpen(true);
       return;
     }
-
     const obj = {
       phone: tel,
       agentId: agentId,
-      isDtm: true
+      isDtm: isDtm,
     };
     try {
       const response = await ApiCall(
@@ -181,14 +180,16 @@ function BgImage(props) {
                   <div className="flex justify-end gap-2">
                     <button
                       type="submit"
+                      onClick={() => setIsDtm(false)}
                       className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
                     >
                       Ro'yxatdan o'tish
                     </button>
 
                     <button
-                        type="submit"
-                        className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
+                      type="submit"
+                      onClick={() => setIsDtm(true)}
+                      className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
                     >
                       DTM bali bilan talaba bo'lish
                     </button>

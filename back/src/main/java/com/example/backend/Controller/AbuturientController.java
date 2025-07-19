@@ -4,7 +4,6 @@ import com.example.backend.DTO.AbuturientDTO;
 import com.example.backend.DTO.ForeignAbuturientDTO;
 import com.example.backend.Entity.*;
 import com.example.backend.Repository.*;
-import com.example.backend.Services.AuthService.AuthService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,14 +16,12 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.openhtmltopdf.css.parser.property.PrimitivePropertyBuilders;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.web.client.RestTemplate;
@@ -74,6 +71,24 @@ public class AbuturientController {
     private final HistoryOfAbuturientRepo historyOfAbuturientRepo;
     private final HistoryRepo historyRepo;
     private final TestScoreRepo testScoreRepo;
+    @PostMapping("/isdtm/{id}")
+    public ResponseEntity<Boolean> isdtm(@PathVariable UUID id, @RequestBody Map<String, Boolean> request) {
+        Optional<Abuturient> abuturientOpt = abuturientRepo.findById(id);
+        if(abuturientOpt.isEmpty()){
+            return ResponseEntity.notFound().build();
+
+        }
+        Boolean isdtm = request.get("isdtm");
+        if (isdtm == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Abuturient abuturient = abuturientOpt.get();
+        abuturient.setIsDtm(isdtm);
+        abuturientRepo.save(abuturient);
+
+        return ResponseEntity.ok(true);
+    }
     @DeleteMapping("/{abuturientId}")
     public HttpEntity<?> deleteAbuturient(@PathVariable UUID abuturientId) {
         abuturientAmocrmRepo.deleteById(abuturientId);

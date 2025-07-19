@@ -210,12 +210,11 @@ function TestAbiturient() {
         // alert(total)
 
 
-        console.log(total)
+
         setShowTest(false);
         if (total < 57) {
-            console.log(total)
-            console.log(total+40)
-            total = total+40; // 70-80 oralig'ida random son
+
+            total = total + 40; // 70-80 oralig'ida random son
         }
         let finalScore = total;
 

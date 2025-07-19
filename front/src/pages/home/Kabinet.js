@@ -9,10 +9,14 @@ import Loading from './Loading';
 
 
 function Kabinet() {
-  const [Loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [score, setScore] = useState("");
+  const [isScoreValid, setIsScoreValid] = useState(true);
   const phone = location.state?.phone || "";
+
   const [abuturient, setAbuturient] = useState({
     firstName: "",
     lastName: "",
@@ -27,12 +31,57 @@ function Kabinet() {
     educationTypeId: "",
     educationFormId: "",
     educationFieldId: "",
+    isDtm: false,
     createdAt: new Date().toISOString(),
   });
+
+  const handleScoreChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || /^[0-9\b]+$/.test(value)) {
+      if (value === '' || parseInt(value) <= 189) {
+        setScore(value);
+        setIsScoreValid(true);
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    await ApiCall(`/api/v1/abuturient/isdtm/` + abuturient.id, "POST", { isdtm: isChecked });
+
+    if (isChecked) {
+      // Agar DTM talaba bo'lsa
+      if (!score || score === "") {
+        setIsScoreValid(false);
+        return;
+      }
+
+      // Ballni serverga yuborish
+      try {
+        setLoading(true);
+        const resultData = {
+          score: parseInt(score),
+          showScore: parseInt(score),
+        };
+
+        await ApiCall(`/api/v1/test/result/${phone}`, "POST", resultData, null, true);
+        navigate("/test", { state: { phone: phone } });
+        setLoading(false);
+        getPhoneData();
+      } catch (error) {
+        console.error("Error submitting test data:", error);
+        setLoading(false);
+      }
+    } else {
+      // Agar DTM talaba bo'lmasa
+      navigate("/test", { state: { phone: phone } });
+    }
+  };
+
   useEffect(() => {
     fetchAbuturientData();
     getPhoneData();
   }, []);
+
   const getPhoneData = async () => {
     try {
       const response = await ApiCall(
@@ -45,9 +94,10 @@ function Kabinet() {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+
     if (!phone || phone === "" || phone === null || phone === undefined) {
       navigate("/");
-    } else
+    } else {
       try {
         const response = await ApiCall(
           `/api/v1/abuturient/${phone}`,
@@ -73,13 +123,12 @@ function Kabinet() {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
+    }
   };
-
 
   const fetchAbuturientData = async () => {
     try {
       const response = await ApiCall(`/api/v1/abuturient/${phone}`, "GET", null, null, true);
-      // console.log("Abuturient data:", response.data);
       if (response.data) {
         setAbuturient(response.data);
       } else {
@@ -200,15 +249,51 @@ function Kabinet() {
               <p className='py-3 pl-3 w-full border border-[#D9D9D9] rounded-md text-sm font-medium lg:text-base'>
                 {abuturient?.educationField?.name || "Ta'lim yo'nalishi ma'lumotlari mavjud emas"}
               </p>
+              <div className='mb-4'>
+                <div className='bg-[#B8DEFF] text-xs w-full py-2 pl-2 lg:py-3 lg:pl-3 text-[#454545] font-semibold lg:text-base flex items-center'>
+                  <input
+                    type="checkbox"
+                    className='mr-2 h-4 w-4 lg:h-5 lg:w-5'
+                    checked={isChecked}
+                    onChange={(e) => {
+                      setIsChecked(e.target.checked);
+                      if (!e.target.checked) {
+                        setIsScoreValid(true);
+                      }
+                    }}
+                  />
+                  DTM ballni kiriting {!abuturient?.isDtm && "(Majburiy emas)"}
+                </div>
+
+                {isChecked && (
+                  <div className='mt-2'>
+                    <input
+                      type="text"
+                      value={score}
+                      onChange={handleScoreChange}
+                      className={`w-full p-2 border ${!abuturient?.isDtm || isScoreValid ? 'border-gray-300' : 'border-red-500'} rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      placeholder={abuturient?.isDtm ? '0-189 (Majburiy)' : '0-189 (Majburiy emas)'}
+                      inputMode='numeric'
+                      pattern='[0-9]*'
+                    />
+                    {abuturient?.isDtm && !isScoreValid && (
+                      <p className='text-xs text-red-500 mt-1'>Iltimos, DTM ballini kiriting (0-189)</p>
+                    )}
+
+                  </div>
+                )}
+              </div>
               <div className="flex justify-end">
                 <button
                   type="button"
-                  className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
-                  onClick={() => navigate("/test", { state: { phone: phone } })}
+                  className={`bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handleSubmit}
+                  disabled={loading}
                 >
-                  Davom etish
+                  {loading ? 'Yuborilmoqda...' : 'Davom etish'}
                 </button>
               </div>
+
             </div>
           </div>
         </div>
