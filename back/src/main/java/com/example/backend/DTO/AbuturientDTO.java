@@ -26,5 +26,5 @@ public class AbuturientDTO {
     private String motherName;
     private String passportNumber;
     private String passportPin;
-
+    private Boolean isDtm;
 }
