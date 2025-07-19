@@ -177,12 +177,19 @@ function BgImage(props) {
                       required
                     />
                   </div>
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
                     <button
                       type="submit"
                       className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
                     >
-                      Davom etish
+                      Ro'yxatdan o'tish
+                    </button>
+
+                    <button
+                        type="submit"
+                        className="bg-[#213972] text-white py-2 px-4 rounded-lg transition duration-300"
+                    >
+                      DTM bali bilan talaba bo'lish
                     </button>
                   </div>
                 </form>

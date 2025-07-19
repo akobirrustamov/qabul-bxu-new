@@ -68,6 +68,7 @@ function Directions() {
   };
   useEffect(() => {
     fetchRegions();
+
   }, []);
 
   const fetchRegions = async () => {
