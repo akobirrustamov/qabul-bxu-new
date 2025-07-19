@@ -31,6 +31,20 @@ function BgImage(props) {
       setTel("+998");
     }
   };
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (!localStorage.getItem("browser_token")) {
+        try {
+          const token = await ApiCall("/api/v1/security/generate", "GET");
+          localStorage.setItem("browser_token", token);
+        } catch (error) {
+          console.error("Token olishda xatolik:", error);
+        }
+      }
+    };
+
+    fetchToken();
+  }, []);
 
   const getPhoneData = async (phone) => {
     try {
