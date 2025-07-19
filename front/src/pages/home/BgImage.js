@@ -93,7 +93,7 @@ function BgImage(props) {
     const obj = {
       phone: tel,
       agentId: agentId,
-      
+      isDtm: true
     };
     try {
       const response = await ApiCall(

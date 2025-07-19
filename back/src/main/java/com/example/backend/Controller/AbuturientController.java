@@ -118,8 +118,15 @@ public class AbuturientController {
             agent = byAgentNumber.get().getAgent();
         }
         try {
-            Abuturient save = abuturientRepo.save(new Abuturient(request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber()));
-            leadStep1(request.getPhone(), save);
+            Abuturient abuturient = new Abuturient(request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber());
+            abuturient.setIsDtm(request.getIsDtm());
+            Abuturient save = abuturientRepo.save(abuturient);
+            try {
+                leadStep1(request.getPhone(), save);
+            }
+            catch (Exception e) {
+                System.out.printf("Abuturient: %s\n", e.getMessage());
+            }
             return ResponseEntity.ok(save);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error saving Abuturient: " + e.getMessage());
@@ -243,7 +250,11 @@ public class AbuturientController {
             abuturient.setDistrict(district);
 
             abuturientRepo.save(abuturient);
-            leadStep2(abuturient);
+            try{
+                leadStep2(abuturient);
+            }catch (Exception e){
+                System.out.printf("Error in leadStep2: " + e.getMessage());
+            }
         }
         return ResponseEntity.ok(abuturient);
     }
@@ -478,7 +489,11 @@ public class AbuturientController {
                 abuturient.setLevel(abuturient.getLevel());
             }
             abuturientRepo.save(abuturient);
-            leadStep2(abuturient);
+            try{
+                leadStep2(abuturient);
+            }catch (Exception e){
+                System.out.printf("Error in leadStep2: " + e.getMessage());
+            }
         }
         return ResponseEntity.ok(abuturient);
     }
@@ -514,7 +529,11 @@ public class AbuturientController {
             abuturient.setDistrict(district);
 
             abuturientRepo.save(abuturient);
-            leadStep2(abuturient);
+            try{
+                leadStep2(abuturient);
+            }catch (Exception e){
+                System.out.printf("Error in leadStep2: " + e.getMessage());
+            }
         }
         return ResponseEntity.ok(abuturient);
     }
@@ -638,7 +657,12 @@ public class AbuturientController {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        leadStep3(abuturient);
+        try {
+            leadStep3(abuturient);
+
+        }catch (Exception e){
+            System.out.printf(" fuck");
+        }
         Document document = new Document(PageSize.A4);
         String filePath = "./Contract_" + phone + ".pdf";
 
