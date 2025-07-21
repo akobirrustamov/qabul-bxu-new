@@ -28,6 +28,8 @@ function DataForm() {
   useEffect(() => {
     getAppealType();
     getEducationType()
+    localStorage.removeItem("browser_token")
+
   }, []);
 
   const getPhoneData = async (response) => {

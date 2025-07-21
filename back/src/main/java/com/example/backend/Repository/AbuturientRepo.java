@@ -149,5 +149,6 @@ public interface AbuturientRepo extends JpaRepository<Abuturient, UUID> {
     @Query(value = "SELECT * from abuturient where passport_pin=:passportPin", nativeQuery = true)
     Optional<Abuturient> findByAbuturientByJshshR(String passportPin);
 
-
+    @Query(value = "SELECT * FROM abuturient WHERE phone = :phone", nativeQuery = true)
+    Optional<Abuturient> findByPhoneOptional(String phone);
 }

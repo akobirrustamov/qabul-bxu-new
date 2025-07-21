@@ -80,6 +80,7 @@ function Kabinet() {
   useEffect(() => {
     fetchAbuturientData();
     getPhoneData();
+    localStorage.removeItem("browser_token")
   }, []);
 
   const getPhoneData = async () => {

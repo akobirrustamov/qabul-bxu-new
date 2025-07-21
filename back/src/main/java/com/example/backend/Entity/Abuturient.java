@@ -30,8 +30,6 @@ public class Abuturient {
 
     private Boolean isDtm;
 
-
-
     @Column( unique = true)
     @Size(min = 14, max = 14, message = "Passport number must be exactly 14 characters long")
     private String passportNumber;
