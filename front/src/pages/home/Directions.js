@@ -68,7 +68,7 @@ function Directions() {
   };
   useEffect(() => {
     fetchRegions();
-
+    localStorage.removeItem("browser_token")
   }, []);
 
   const fetchRegions = async () => {
@@ -136,6 +136,7 @@ function Directions() {
 
       if (response.data?.phone!==phone){
         alert(`Kiritilgan pasport ma'lumotlari oldin ro'yxatdan o'tgan. Bog'langan telefon raqami: ${response.data.phone}`);
+        return;
       }
       getPhoneData(response);
       // navigate("/data-form", { state: phone });

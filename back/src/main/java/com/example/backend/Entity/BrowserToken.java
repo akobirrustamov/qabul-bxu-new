@@ -22,4 +22,7 @@ public class BrowserToken {
     private LocalDateTime createdAt;
 
     private String ipAddress;
+
+    private Boolean isActive;
+
 }

@@ -22,6 +22,7 @@ public class SecurityServiceUser {
                 .token(token)
                 .createdAt(LocalDateTime.now())
                 .ipAddress(ip)
+                .isActive(true)
                 .build();
 
         tokenRepository.save(browserToken);

@@ -67,7 +67,7 @@ public class AbuturientController {
     private final EducationFieldRepo educationFieldRepo;
     private final AgentPathRepo agentPathRepo;
     private final DistrictRepo districtRepo;
-
+    private final BrowserTokenRepository browserTokenRepository;
     private final HistoryOfAbuturientRepo historyOfAbuturientRepo;
     private final HistoryRepo historyRepo;
     private final TestScoreRepo testScoreRepo;
@@ -126,22 +126,53 @@ public class AbuturientController {
     }
 
     @PostMapping
-    public HttpEntity<?> addAbuturient(@RequestBody AbuturientDTO request) {
+    public HttpEntity<?> addAbuturient(@RequestHeader("Authorization") String token,
+                                       @RequestBody AbuturientDTO request) {
+        System.out.printf("AbuturientDTO: %s\n", request);
+        System.out.printf("token: %s\n", token);
+
+        Optional<Abuturient> byPhone = abuturientRepo.findByPhoneOptional(request.getPhone());
+        if(byPhone.isPresent()){
+            return ResponseEntity.ok(byPhone.get());
+        }
+
+        // 🔐 Token check
+        if (token == null ) {
+            return ResponseEntity.status(401).body("Iltimos odam bo'laylik");
+        }
+
+        String pureToken = token; // remove "Bearer "
+        System.out.printf("token: %s\n", pureToken);
+        Optional<BrowserToken> browserToken= browserTokenRepository.findByToken(pureToken);
+        if (browserToken.isEmpty()) {
+            return ResponseEntity.status(401).body("Iltimos odam bo'laylik2");
+        }
+        if (!browserToken.get().getIsActive()){
+            return ResponseEntity.status(401).body("Iltimos odam bo'laylik3");
+        }
+        BrowserToken browserToken1 = browserToken.get();
+        browserToken1.setIsActive(false);
+        browserTokenRepository.save(browserToken1);
+        // 🎯 Continue if token is valid
         Optional<AgentPath> byAgentNumber = agentPathRepo.findByAgentNumber(request.getAgentId());
         User agent = null;
         if (byAgentNumber.isPresent()) {
             agent = byAgentNumber.get().getAgent();
         }
+
         try {
-            Abuturient abuturient = new Abuturient(request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber());
+            Abuturient abuturient = new Abuturient(
+                    request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber()
+            );
             abuturient.setIsDtm(request.getIsDtm());
             Abuturient save = abuturientRepo.save(abuturient);
+
             try {
                 leadStep1(request.getPhone(), save);
+            } catch (Exception e) {
+                System.out.printf("Abuturient (leadStep1 error): %s\n", e.getMessage());
             }
-            catch (Exception e) {
-                System.out.printf("Abuturient: %s\n", e.getMessage());
-            }
+
             return ResponseEntity.ok(save);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error saving Abuturient: " + e.getMessage());
