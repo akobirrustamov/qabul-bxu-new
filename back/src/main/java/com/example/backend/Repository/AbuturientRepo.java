@@ -43,6 +43,7 @@ public interface AbuturientRepo extends JpaRepository<Abuturient, UUID> {
 
             nativeQuery = true)
     Page<Abuturient> findByFilters(
+
             @Param("fullName") String fullName,
             @Param("passportNumber") String passportNumber,
             @Param("passportPin") String passportPin,
@@ -151,4 +152,49 @@ public interface AbuturientRepo extends JpaRepository<Abuturient, UUID> {
 
     @Query(value = "SELECT * FROM abuturient WHERE phone = :phone", nativeQuery = true)
     Optional<Abuturient> findByPhoneOptional(String phone);
+
+
+
+
+    @Query(value = "SELECT a.* FROM abuturient a " +
+            "JOIN education_field ef ON a.education_field_id = ef.id " +
+            "WHERE " +
+            "(:fullName IS NULL OR :fullName = '' OR LOWER(CONCAT_WS(' ', a.last_name, a.first_name, a.father_name)) LIKE LOWER(CONCAT('%', :fullName, '%'))) AND " +
+            "(:passportNumber IS NULL OR :passportNumber = '' OR a.passport_number LIKE CONCAT('%', :passportNumber, '%')) AND " +
+            "(:passportPin IS NULL OR :passportPin = '' OR a.passport_pin LIKE CONCAT('%', :passportPin, '%')) AND " +
+            "(:phone IS NULL OR :phone = '' OR a.phone LIKE CONCAT('%', :phone, '%')) AND " +
+            "(COALESCE(:appealTypeId, 0) = 0 OR a.appeal_type_id = :appealTypeId) AND " +
+            "(COALESCE(:educationFieldId, 0) = 0 OR a.education_field_id = :educationFieldId) AND " +
+            "(COALESCE(:educationFormId, 0) = 0 OR ef.education_form_id = :educationFormId) AND " +
+        "(COALESCE(:agentId, '00000000-0000-0000-0000-000000000000') = '00000000-0000-0000-0000-000000000000' OR a.agent_id = :agentId) AND " +
+                "(COALESCE(:createdAt, NULL) IS NULL OR DATE(a.created_at) = :createdAt)",
+
+    countQuery = "SELECT COUNT(*) FROM abuturient a " +
+            "JOIN education_field ef ON a.education_field_id = ef.id " +
+            "WHERE " +
+            "(:fullName IS NULL OR :fullName = '' OR LOWER(CONCAT_WS(' ', a.last_name, a.first_name, a.father_name)) LIKE LOWER(CONCAT('%', :fullName, '%'))) AND " +
+            "(:passportNumber IS NULL OR :passportNumber = '' OR a.passport_number LIKE CONCAT('%', :passportNumber, '%')) AND " +
+            "(:passportPin IS NULL OR :passportPin = '' OR a.passport_pin LIKE CONCAT('%', :passportPin, '%')) AND " +
+            "(:phone IS NULL OR :phone = '' OR a.phone LIKE CONCAT('%', :phone, '%')) AND " +
+            "(COALESCE(:appealTypeId, 0) = 0 OR a.appeal_type_id = :appealTypeId) AND " +
+            "(COALESCE(:educationFieldId, 0) = 0 OR a.education_field_id = :educationFieldId) AND " +
+            "(COALESCE(:educationFormId, 0) = 0 OR ef.education_form_id = :educationFormId) AND " +
+        "(COALESCE(:agentId, '00000000-0000-0000-0000-000000000000') = '00000000-0000-0000-0000-000000000000' OR a.agent_id = :agentId) AND " +
+                "(COALESCE(:createdAt, NULL) IS NULL OR DATE(a.created_at) = :createdAt)",
+
+    nativeQuery = true)
+
+    Page<Abuturient> findByFiltersSecond(
+            @Param("fullName") String fullName,
+            @Param("passportNumber") String passportNumber,
+            @Param("passportPin") String passportPin,
+            @Param("phone") String phone,
+            @Param("appealTypeId") Integer appealTypeId,
+            @Param("educationFieldId") Integer educationFieldId,
+            Integer educationFormId,
+            @Param("agentId") UUID agentId,
+            @Param("createdAt") LocalDate createdAt,
+            Pageable pageable);
+
+
 }

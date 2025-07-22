@@ -5,12 +5,14 @@ import com.example.backend.Repository.AbuturientDocumentRepo;
 import com.example.backend.Repository.AbuturientRepo;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -159,6 +161,63 @@ public class ExcelExportService {
 
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
+        }
+    }
+
+    public ByteArrayInputStream exportToExcelSecondJob(
+            String firstName,
+            String lastName,
+            String fatherName,
+            String passportNumber,
+            String passportPin,
+            String phone,
+            Integer appealTypeId,
+            Integer educationFieldId,
+            UUID agentId,
+            LocalDate createdAt
+    ) {
+        // findByFilters qaytaradi Page<Abuturient> => List<Abuturient> qilish kerak
+        List<Abuturient> abuturients = abuturientRepo.findByFilters(
+                firstName,
+                passportNumber,
+                passportPin,
+                phone,
+                appealTypeId,
+                educationFieldId,
+                agentId,
+                createdAt,
+                Pageable.unpaged() // bu orqali barcha natijalar olinadi
+        ).getContent();
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("SecondJob");
+
+            // Header row
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"#", "Ism", "Familiya", "Passport", "Telefon"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            int rowIdx = 1;
+            int counter = 1;
+            for (Abuturient abuturient : abuturients) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(counter++);
+                row.createCell(1).setCellValue(abuturient.getFirstName() != null ? abuturient.getFirstName() : "");
+                row.createCell(2).setCellValue(abuturient.getLastName() != null ? abuturient.getLastName() : "");
+                row.createCell(3).setCellValue(abuturient.getPassportNumber() != null ? abuturient.getPassportNumber() : "");
+                row.createCell(4).setCellValue(abuturient.getPhone() != null ? abuturient.getPhone() : "");
+            }
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

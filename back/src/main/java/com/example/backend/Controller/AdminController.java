@@ -155,6 +155,40 @@ public class AdminController {
         FileCopyUtils.copy(in, response.getOutputStream());
     }
 
+    @GetMapping("/appeals/SecondStudy")
+    public ResponseEntity<?> getAbuturientsSecondStudy(
+            @RequestParam(required = false, defaultValue = "") String firstName,
+            @RequestParam(required = false, defaultValue = "") String lastName,
+            @RequestParam(required = false, defaultValue = "") String fatherName,
+            @RequestParam(required = false, defaultValue = "") String passportNumber,
+            @RequestParam(required = false, defaultValue = "") String passportPin,
+            @RequestParam(required = false, defaultValue = "") String phone,
+            @RequestParam(required = false) Integer appealTypeId,
+            @RequestParam(required = false) Integer educationFieldId,
+            @RequestParam(required = false) UUID agentId,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate createdAt,
+            @PageableDefault(size = 2, page = 0) Pageable pageable) {
+        Page<Abuturient> abuturients = abuturientRepo.findByFiltersSecond(
+                firstName,
+                passportNumber,
+                passportPin,
+                phone,
+                appealTypeId,
+                educationFieldId,
+                8,
+//                  6,
+//                localhostga 8 emas 6 bo'ladi'
+                agentId,
+                createdAt,
+                pageable);
+        return ResponseEntity.ok(abuturients);
+
+    }
+
+
+
+
+
 
     @PutMapping("/appeals/{id}/{token}")
     public HttpEntity<?> updateAbuturient(@PathVariable UUID id, @PathVariable String token, @RequestBody AbuturientPostDTO dto) {

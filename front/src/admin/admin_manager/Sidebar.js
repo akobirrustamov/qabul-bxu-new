@@ -15,6 +15,7 @@ function Sidebar() {
       to: "/manager/transform-education",
       label: "O'qishni ko'chirish arizalar",
     },
+    { to: "/manager/SecondStudy", label: "Ikkinchi mutaxasislik" },
     { to: "/manager/history", label: "Kunlik Faollik" },
     { to: "/manager/agent", label: "Agentlar" },
   ];

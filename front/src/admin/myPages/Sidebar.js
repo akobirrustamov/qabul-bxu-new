@@ -189,6 +189,29 @@ function Sidebar(props) {
             </li>
             <li>
               <Link
+                to={"/dashboard/SecondStudy"}
+                className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${isActive(
+                  "/dashboard/SecondStudy"
+                )}`}
+              >
+                <svg
+                  className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="flex-1 ms-3 whitespace-nowrap">
+                  Ikkinchi Mutaxasislik
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 to={"/dashboard/history"}
                 className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${isActive(
                   "/dashboard/history"
