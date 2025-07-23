@@ -28,16 +28,15 @@ public class SecurityController {
 
     @PostMapping("/generate")
     public HttpEntity<?> generateWithCaptcha(
-            @RequestParam("g-recaptcha-response") String captchaToken,
             @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
             HttpServletRequest request) {
 
         if (ip == null) ip = request.getRemoteAddr();
         System.out.printf("IP: %s\n", ip);
 
-        if (!captchaService.verifyCaptcha(captchaToken)) {
-            return ResponseEntity.status(403).body("Captcha validation failed");
-        }
+//        if (!captchaService.verifyCaptcha(captchaToken)) {
+//            return ResponseEntity.status(403).body("Captcha validation failed");
+//        }
 
         return securityServiceUser.generateToken(ip);
     }
