@@ -1158,15 +1158,19 @@ public class AbuturientController {
             UUID specificAgentId = UUID.fromString("c595703d-7d81-4476-8f0b-d75f00cf907e");
             LocalDateTime createdAt = abuturient.getCreatedAt();
 
-            if (createdAt != null &&
-                    (abuturient.getAgent() == null || specificAgentId.equals(abuturient.getAgent().getId())) &&
-                    createdAt.toLocalDate().isAfter(LocalDate.of(2025, 7, 12))) {
+            if (createdAt != null && (abuturient.getAgent() == null || specificAgentId.equals(abuturient.getAgent().getId())) && createdAt.toLocalDate().isAfter(LocalDate.of(2025, 7, 12))) {
 
                 leftCell1.addElement(new Paragraph("Hisob raqami: 20208000305439719002", regularFont));
 
             } else {
+                if (abuturient.getIsUniversity()){
+                    leftCell1.addElement(new Paragraph("Hisob raqami: 20208000305439719002", regularFont));
 
-                leftCell1.addElement(new Paragraph("Hisob raqami: 20208000105439719001", regularFont));
+                }else {
+                    leftCell1.addElement(new Paragraph("Hisob raqami: 20208000105439719001", regularFont));
+
+                }
+
             }
 
 
