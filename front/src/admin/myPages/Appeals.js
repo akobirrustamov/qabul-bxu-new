@@ -479,6 +479,45 @@ function Appeals() {
       console.error("Error downloading PDF:", error);
     }
   };
+  const handleDownloadPDF02 = async (phone) => {
+    try {
+      const response = await fetch(
+        `${baseUrl}/api/v1/abuturient/contract02/${phone}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const contentType = response.headers.get("Content-Type");
+      if (!contentType || !contentType.includes("application/pdf")) {
+        throw new Error("The response is not a valid PDF file.");
+      }
+
+      const blob = await response.blob();
+      if (!blob.size) {
+        throw new Error("The PDF file is empty.");
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `Contract_${phone}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      console.log("PDF downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
 
@@ -965,6 +1004,28 @@ function Appeals() {
                   <button
                     className="text-white bg-green-600 rounded p-1 hover:underline"
                     onClick={() => handleDownloadPDF(appeal.phone)}
+                  >
+                    <svg
+                      className="w-6 h-6 text-gray-800 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    className="text-white bg-yellow-400 rounded p-1 hover:underline"
+                    onClick={() => handleDownloadPDF02(appeal.phone)}
                   >
                     <svg
                       className="w-6 h-6 text-gray-800 dark:text-white"

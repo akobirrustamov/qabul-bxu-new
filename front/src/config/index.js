@@ -3,11 +3,11 @@ export let baseUrl;
 baseUrl = "http://localhost:8080";
 // baseUrl = "https://qabul.bxu.uz";
 // baseUrl = "";
-export default function (url, method, data, param, is_user=false) {
+export default function (url, method, data, param, is_user = false) {
   let token = localStorage.getItem("access_token");
   // console.log(is_user)
-  if(is_user){
-    token =  localStorage.getItem("browser_token");
+  if (is_user) {
+    token = localStorage.getItem("browser_token");
     // console.log(token)
   }
   // console.log(param)
