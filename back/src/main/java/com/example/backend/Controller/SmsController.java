@@ -28,11 +28,13 @@ public class SmsController {
         if (smsCodeOpt.isPresent()) {
             SmsCode smsCode = smsCodeOpt.get();
 
+
             // Kod noto'g'ri yoki muddati tugagan bo'lsa
             if (!smsCode.getCode().equals(code) || LocalDateTime.now().isAfter(smsCode.getExpireTime())) {
                 return ResponseEntity.status(403).body("Kod noto‘g‘ri yoki eskirgan");
             }
 
+            smsCodeRepo.delete(smsCode);
             return ResponseEntity.ok(smsCode.getAbuturient());
         }
 

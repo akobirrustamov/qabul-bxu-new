@@ -179,7 +179,13 @@ public class AbuturientController {
 
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime expiryTime = now.plusMinutes(2);
-
+            Optional<SmsCode> byAbuturientId = smsCodeRepo.findByAbuturientId(save.getId());
+            if (byAbuturientId.isPresent()) {
+                if (LocalDateTime.now().isAfter(byAbuturientId.get().getExpireTime())){
+                    smsCodeRepo.delete(byAbuturientId.get());
+                }
+                return ResponseEntity.noContent().build();
+            }
             SmsCode smsCode = new SmsCode(code,save,LocalDateTime.now(), expiryTime);
 
             if (b) {
