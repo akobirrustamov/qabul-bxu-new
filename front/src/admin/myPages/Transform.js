@@ -456,6 +456,46 @@ function Transform() {
       console.error("Error downloading PDF:", error);
     }
   };
+  const handleDownloadPDF02 = async (phone) => {
+    try {
+      const response = await fetch(
+          `${baseUrl}/api/v1/abuturient/contract02/${phone}`,
+          {
+            method: "GET",
+          }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const contentType = response.headers.get("Content-Type");
+      if (!contentType || !contentType.includes("application/pdf")) {
+        throw new Error("The response is not a valid PDF file.");
+      }
+
+      const blob = await response.blob();
+      if (!blob.size) {
+        throw new Error("The PDF file is empty.");
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `Contract_${phone}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      console.log("PDF downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
+
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     if (name === "level") {

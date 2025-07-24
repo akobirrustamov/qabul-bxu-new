@@ -27,9 +27,8 @@ public class Abuturient {
     private String firstName;
     private String lastName;
     private String fatherName;
-
     private Boolean isDtm;
-
+    private Boolean isUniversity;
     @Column( unique = true)
     @Size(min = 14, max = 14, message = "Passport number must be exactly 14 characters long")
     private String passportNumber;

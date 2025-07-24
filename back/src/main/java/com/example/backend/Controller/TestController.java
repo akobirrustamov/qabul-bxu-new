@@ -156,7 +156,8 @@ public class TestController {
                 String templateUrl = "https://notify.eskiz.uz/api/user/templates";
                 HttpEntity<Void> entity = new HttpEntity<>(createHeaders(token));
                 Map templatesResponse = restTemplate.exchange(templateUrl, HttpMethod.GET, entity, Map.class).getBody();
-                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(0)).get("template");
+                System.out.printf("Response from server: %s", templatesResponse);
+                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(1)).get("template");
 
                 String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + phone;
                 String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", phone);

@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface SmsCodeRepo extends JpaRepository<SmsCode,Integer> {
 
 
-    @Query(value = "select * from sms_code where abuturient_id=:abuturientId")
+    @Query(value = "select * from sms_code where abuturient_id=:abuturientId", nativeQuery = true)
     Optional<SmsCode> findByAbuturientId(UUID abuturientId);
 }
