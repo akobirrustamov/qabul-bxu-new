@@ -92,7 +92,7 @@ public class TestController {
 // Perform the comparison
         System.out.println(rightScore);
         System.out.println(rightScore < 57.0f);
-        if (rightScore < 57.0f) {
+        if (rightScore < 45.0f) {
             testScore.setStatus(0);
             abiturient.setStatus(2);
             abuturientRepo.save(abiturient);
@@ -139,7 +139,7 @@ public class TestController {
             return new ResponseEntity<>("Invalid score format", HttpStatus.BAD_REQUEST);
         }
 
-        if (showScore > 56) {
+        if (showScore > 45) {
             try {
                 RestTemplate restTemplate = new RestTemplate();
                 String email = "akobirjavadev10@gmail.com";
