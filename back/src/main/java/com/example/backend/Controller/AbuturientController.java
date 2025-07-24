@@ -1251,6 +1251,7 @@ public class AbuturientController {
     public void getAllAbuturientContract02(@PathVariable String phone, HttpServletResponse response) throws IOException {
         Abuturient abuturient = abuturientRepo.findByPhone(phone);
         abuturient.setStatus(4);
+        abuturient.setIsUniversity(true);
         abuturientRepo.save(abuturient);
         if (abuturient == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
