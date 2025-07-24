@@ -293,7 +293,8 @@ public class AdminController {
                 String templateUrl = "https://notify.eskiz.uz/api/user/templates";
                 HttpEntity<Void> entity = new HttpEntity<>(createHeaders(token));
                 Map templatesResponse = restTemplate.exchange(templateUrl, HttpMethod.GET, entity, Map.class).getBody();
-                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(0)).get("template");
+                System.out.printf("templatesResponse: %s\n", templatesResponse);
+                String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(1)).get("template");
                 System.out.printf("template: %s\n", template);
                 String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + abuturient.getPhone();
                 String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", "+998553099999");

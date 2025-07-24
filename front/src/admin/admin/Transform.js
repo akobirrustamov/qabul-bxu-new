@@ -337,7 +337,7 @@ function Transform() {
   const handleDownloadPDF = async (phone) => {
     try {
       const response = await fetch(
-        `${baseUrl}/api/v1/abuturient/contract/${phone}`,
+        `${baseUrl}/api/v1/abuturient/contract02/${phone}`,
         {
           method: "GET",
         }
