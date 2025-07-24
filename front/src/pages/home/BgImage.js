@@ -1,7 +1,13 @@
 import ApiCall from "../../config";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaTelegramPlane, FaFacebookF, FaYoutube, FaInstagram, FaGlobe } from "react-icons/fa";
+import {
+  FaTelegramPlane,
+  FaFacebookF,
+  FaYoutube,
+  FaInstagram,
+  FaGlobe,
+} from "react-icons/fa";
 import Loading from "./Loading";
 
 function BgImage() {
@@ -13,17 +19,17 @@ function BgImage() {
   const [isDtm, setIsDtm] = useState(false);
   const [smsCode, setSmsCode] = useState("");
   const [showSmsInput, setShowSmsInput] = useState(false);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(120);
   const [isTimerActive, setIsTimerActive] = useState(false);
+  const [abuturientId, setAbuturientId] = useState(null);
   const navigate = useNavigate();
   const timerRef = useRef(null);
 
   const handleClose = () => setOpen(false);
 
-  // Timer effect
   useEffect(() => {
     if (isTimerActive && timer > 0) {
-      timerRef.current = setTimeout(() => setTimer(timer - 1), 2000);
+      timerRef.current = setTimeout(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerActive(false);
     }
@@ -41,7 +47,7 @@ function BgImage() {
   };
 
   const handleSmsChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Faqat raqamlarga ruxsat berish
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 4) {
       setSmsCode(value);
     }
@@ -55,8 +61,13 @@ function BgImage() {
   const resendSms = async () => {
     try {
       setLoading(true);
-      // Bu yerda SMS qayta yuborish API chaqiruvi bo'lishi kerak
-      // await ApiCall(`/api/v1/resend-sms`, "POST", { phone: tel });
+      await ApiCall(
+        `/api/v1/sms/${abuturientId}/${smsCode}`,
+        "GET",
+        null,
+        null,
+        true
+      );
       startTimer();
       setMessage("SMS qayta yuborildi!");
       setOpen(true);
@@ -98,12 +109,21 @@ function BgImage() {
       navigate("/");
     } else {
       switch (data.status) {
-        case 0: navigate("/user-info", { state: { phone: data.phone } }); break;
-        case 1: navigate("/data-form", { state: { phone: data.phone } }); break;
-        case 2: navigate("/cabinet", { state: { phone: data.phone } }); break;
+        case 0:
+          navigate("/user-info", { state: { phone: data.phone } });
+          break;
+        case 1:
+          navigate("/data-form", { state: { phone: data.phone } });
+          break;
+        case 2:
+          navigate("/cabinet", { state: { phone: data.phone } });
+          break;
         case 3:
-        case 4: navigate("/test", { state: { phone: data.phone } }); break;
-        default: navigate("/");
+        case 4:
+          navigate("/test", { state: { phone: data.phone } });
+          break;
+        default:
+          navigate("/");
       }
     }
   };
@@ -120,34 +140,53 @@ function BgImage() {
       return;
     }
 
-    // Demo uchun SMS inputini ko'rsatamiz
-    setShowSmsInput(true);
-    startTimer();
-    setLoading(false);
-  };
-
-  const verifySmsCode = async () => {
-    setLoading(true);
-
     try {
       const obj = {
         phone: tel,
         agentId: agentId,
         isDtm: isDtm,
-        smsCode: smsCode
       };
 
       const response = await ApiCall(`/api/v1/abuturient`, "POST", obj, null, true);
-      await getPhoneData(response);
-      setShowSmsInput(false);
+      setAbuturientId(response.data.id);
+      setShowSmsInput(true);
+      startTimer();
     } catch (error) {
       console.error("Error saving data:", error);
+      setMessage(error?.response?.data?.message || "Xatolik yuz berdi!");
+      setOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifySmsCode = async () => {
+    setLoading(true);
+    try {
+      const response = await ApiCall(
+        `/api/v1/sms/${abuturientId}/${smsCode}`,
+        "GET",
+        null,
+        null,
+        true
+      );
+
+      if (response.success) {
+        await getPhoneData(response);
+        setShowSmsInput(false);
+      } else {
+        setMessage("Noto'g'ri SMS kodi kiritildi!");
+        setOpen(true);
+      }
+    } catch (error) {
+      console.error("Error verifying SMS code:", error);
       setMessage(error?.response?.data?.message || "Xatolik yuz berdi. SMS kod noto'g'ri!");
       setOpen(true);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="bg-[#F6F6F6] min-h-screen">
@@ -231,14 +270,14 @@ function BgImage() {
                     </button>
                   </div>
 
-                  {/* Tasdiqlash Tugmasi (faqat SMS inputi ko'rinayotganda) */}
+                  {/* Tasdiqlash Tugmasi */}
                   {showSmsInput && (
                     <div className="flex justify-end pt-2">
                       <button
                         type="button"
                         onClick={verifySmsCode}
-                        disabled={smsCode.length !== 6}
-                        className={`bg-green-600 text-white py-2 px-4 rounded-lg transition ${smsCode.length !== 6 ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"}`}
+                        disabled={smsCode.length !== 4}
+                        className={`bg-green-600 text-white py-2 px-4 rounded-lg transition ${smsCode.length !== 4 ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"}`}
                       >
                         Tasdiqlash
                       </button>
@@ -248,7 +287,7 @@ function BgImage() {
               </div>
             </div>
 
-            {/* Xabar Modali (agar kerak bo'lsa) */}
+            {/* Xabar Modali */}
             {open && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">

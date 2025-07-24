@@ -50,6 +50,7 @@ public class AbuturientController {
     private static final String REDIRECT_URI = "https://6720aadf263a.ngrok-free.app/api/v1/amocrm/oauth";
     private static final String AMO_DOMAIN = "buxpxticrm.amocrm.ru";
     private static final String TOKEN_PATH = "./tokens.json";
+
     private final AbuturientAmocrmRepo abuturientAmocrmRepo;
     RestTemplate restTemplate = new RestTemplate(
             new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault())
