@@ -4,6 +4,7 @@ import com.example.backend.DTO.AbuturientDTO;
 import com.example.backend.DTO.ForeignAbuturientDTO;
 import com.example.backend.Entity.*;
 import com.example.backend.Repository.*;
+import com.example.backend.Services.SmsCodeService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,6 +72,10 @@ public class AbuturientController {
     private final HistoryOfAbuturientRepo historyOfAbuturientRepo;
     private final HistoryRepo historyRepo;
     private final TestScoreRepo testScoreRepo;
+    private final SmsCodeRepo smsCodeRepo;
+    private final SmsCodeService smsCodeService;
+
+
     @PostMapping("/isdtm/{id}")
     public ResponseEntity<Boolean> isdtm(@PathVariable UUID id, @RequestBody Map<String, Boolean> request) {
         Optional<Abuturient> abuturientOpt = abuturientRepo.findById(id);
@@ -167,13 +172,24 @@ public class AbuturientController {
             abuturient.setIsDtm(request.getIsDtm());
             Abuturient save = abuturientRepo.save(abuturient);
 
-            try {
-                leadStep1(request.getPhone(), save);
-            } catch (Exception e) {
-                System.out.printf("Abuturient (leadStep1 error): %s\n", e.getMessage());
+            Random random = new Random(); // xavfsizlik uchun: new SecureRandom();
+            int code = 1000 + random.nextInt(9000); // 1000–9999 oralig‘ida
+
+            Boolean b = smsCodeService.sendSmsCode(abuturient.getPhone(), code);
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime expiryTime = now.plusMinutes(2);
+
+            SmsCode smsCode = new SmsCode(code,save,LocalDateTime.now(), expiryTime);
+
+            if (b) {
+                return ResponseEntity.ok(save);
+            } else {
+                return ResponseEntity.notFound().build();
             }
 
-            return ResponseEntity.ok(save);
+
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error saving Abuturient: " + e.getMessage());
         }
