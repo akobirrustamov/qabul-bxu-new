@@ -20,10 +20,12 @@ import Loading from "./Loading";
 function TestAbiturient() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [showTest, setShowTest] = useState(true);
     const location = useLocation();
+    const phone = location.state?.phone || "";
+    const [showTest, setShowTest] = useState(true);
     const [answers, setAnswers] = useState({});
-
+    const [passportSeries, setPassportSeries] = useState('');
+    const [showPassportForm, setShowPassportForm] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [subjectNames, setSubjectNames] = useState([]);
     const [formData, setFormData] = useState(null);
@@ -32,6 +34,12 @@ function TestAbiturient() {
     const [certificate2, setCertificate2] = useState(null)
     const [certificate3, setCertificate3] = useState(null)
     const [ijodiy, setIjodiy] = useState(false)
+
+    const [abuturient, setAbuturient] = useState({
+        passportNumber: "",
+        passportPin: "",
+    });
+
     const [subjects, setSubjects] = useState({
         subject1: [],
         subject2: [],
@@ -40,7 +48,6 @@ function TestAbiturient() {
         subject5: [],
     });
     const [canSubmit, setCanSubmit] = useState(false);
-    const phone = location.state?.phone || "";
     // const phone = "+998900829474";
 
 
@@ -246,8 +253,45 @@ function TestAbiturient() {
         }
     };
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "passportPin") {
+            const numericValue = value.replace(/\D/g, "");
+            if (numericValue.length <= 14) {
+                setAbuturient((prev) => ({ ...prev, [name]: numericValue }));
+            }
+            return;
+        }
+        if (name === "passportNumber") {
+            const formattedValue = value.toUpperCase();
+            const letters = formattedValue.slice(0, 2).replace(/[^A-Z]/g, "");
+            const numbers = formattedValue.slice(2).replace(/\D/g, "");
+            const passportNumber = `${letters}${numbers.slice(0, 7)}`;
+            setAbuturient((prev) => ({ ...prev, [name]: passportNumber }));
+            return;
+        }
+        setAbuturient({ ...abuturient, [name]: value });
+    };
+
+
+
     const handleDownloadPDF = async () => {
-        setLoading(true); // Yuklash boshlanishida loading ni true qilamiz
+        setLoading(true);
+        try {
+            const response = await ApiCall(`/api/v1/abuturient/${phone}`, "GET", null, null, true);
+
+            if (!response.data.passportPin) {
+                setShowPassportForm(true);
+            } else {
+                await downloadPDF();
+            }
+        } catch (error) {
+            console.error("Error fetching abuturient data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const downloadPDF = async () => {
         try {
             const response = await fetch(`${baseUrl}/api/v1/abuturient/contract/${phone}`, {
                 method: 'GET',
@@ -266,7 +310,6 @@ function TestAbiturient() {
             if (!blob.size) {
                 throw new Error("The PDF file is empty.");
             }
-
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -278,10 +321,57 @@ function TestAbiturient() {
             console.log("PDF downloaded successfully");
         } catch (error) {
             console.error("Error downloading PDF:", error);
-        } finally {
-            setLoading(false); // Yuklash tugaganda loading ni false qilamiz
         }
     };
+
+    const handleSubmitPassportInfo = async () => {
+        const isValidPassportNumber = /^[A-Z]{2}\d{7}$/.test(abuturient.passportNumber);
+        const isValidPassportPin = /^\d{14}$/.test(abuturient.passportPin);
+
+        if (!isValidPassportNumber) {
+            alert("Pasport raqami noto‘g‘ri formatda. (AA1234567 shaklida bo‘lishi kerak)");
+            return;
+        }
+
+        if (!isValidPassportPin) {
+            alert("JSHSHIR 14 ta raqamdan iborat bo‘lishi kerak.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const payload = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                fatherName: formData.fatherName,
+                regionId: formData.district.region.id,
+                districtId: formData.district.id,
+                phone: formData.phone,
+                passportNumber: abuturient.passportNumber,
+                passportPin: abuturient.passportPin
+            };
+            const response = await ApiCall(
+                `/api/v1/abuturient/user-info/edit`,
+                "PUT",
+                payload,
+                null,
+                true
+            );
+            if (response.data.phone !== phone) {
+                alert(`Kiritilgan pasport ma'lumotlari oldin ro'yxatdan o'tgan. Bog'langan telefon raqami: ${response.data.phone}`);
+                return;
+            }
+            setShowPassportForm(false);
+            await downloadPDF();
+        } catch (error) {
+            console.error("Passport ma'lumotlarini saqlashda xatolik:", error);
+            alert("Passport ma'lumotlarini saqlashda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const [shuffledAnswers, setShuffledAnswers] = useState({});
     useEffect(() => {
         if (Object.keys(subjects).length > 0) {
@@ -576,6 +666,48 @@ function TestAbiturient() {
                                                                 </>
                                                             )}
                                                         </button>
+                                                        {showPassportForm && (
+                                                            <div className="mt-4 space-y-2">
+                                                                {/* Passport Number */}
+                                                                <div>
+                                                                    <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                                        Passport seriya raqami
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        name="passportNumber"
+                                                                        value={abuturient.passportNumber}
+                                                                        onChange={handleInputChange}
+                                                                        className="border border-gray-300 rounded-md p-1 w-full"
+                                                                        placeholder="AA1234567"
+                                                                    />
+
+                                                                </div>
+                                                                {/* JSHIR */}
+                                                                <div>
+                                                                    <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                                        JSHSHIR
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        name="passportPin"
+                                                                        value={abuturient.passportPin}
+                                                                        onChange={handleInputChange}
+                                                                        className="border border-gray-300 rounded-md p-1 w-full"
+                                                                        placeholder="12345678901234"
+                                                                    />
+
+                                                                </div>
+                                                                <button
+                                                                    onClick={handleSubmitPassportInfo}
+                                                                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                                                                    disabled={loading}
+                                                                >
+                                                                    Yuborish
+                                                                </button>
+                                                            </div>
+                                                        )}
+
                                                     </div>
                                                 )}
                                                 <h3 className="text-2xl font-medium text-[#154476] lg:text-4xl my-4">Buxoro Xalqaro Universiteti manzili</h3>
@@ -673,6 +805,47 @@ function TestAbiturient() {
                                                                 </>
                                                             )}
                                                         </button>
+                                                        {showPassportForm && (
+                                                            <div className="mt-4 space-y-2">
+                                                                {/* Passport Number */}
+                                                                <div>
+                                                                    <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                                        Passport seriya raqami
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        name="passportNumber"
+                                                                        value={abuturient.passportNumber}
+                                                                        onChange={handleInputChange}
+                                                                        className="border border-gray-300 rounded-md p-1 w-full"
+                                                                        placeholder="AA1234567"
+                                                                    />
+
+                                                                </div>
+                                                                {/* JSHIR */}
+                                                                <div>
+                                                                    <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                                        JSHSHIR
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        name="passportPin"
+                                                                        value={abuturient.passportPin}
+                                                                        onChange={handleInputChange}
+                                                                        className="border border-gray-300 rounded-md p-1 w-full"
+                                                                        placeholder="12345678901234"
+                                                                    />
+
+                                                                </div>
+                                                                <button
+                                                                    onClick={handleSubmitPassportInfo}
+                                                                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                                                                    disabled={loading}
+                                                                >
+                                                                    Yuborish
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <h3 className="text-2xl font-medium text-[#154476] lg:text-4xl my-4">Buxoro Xalqaro Universiteti manzili</h3>

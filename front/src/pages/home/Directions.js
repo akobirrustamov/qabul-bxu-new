@@ -23,9 +23,9 @@ function Directions() {
     firstName: "",
     lastName: "",
     fatherName: "",
-    phone: phone || "",
     regionId: "",
     districtId: "",
+    phone: phone || "",
     passportNumber: "",
     passportPin: "",
   });
@@ -124,6 +124,7 @@ function Directions() {
       alert("Iltimos, barcha maydonlarni to'ldiring!");
       return;
     }
+    console.log(abuturient);
 
     try {
       const response = await ApiCall(
@@ -134,7 +135,7 @@ function Directions() {
         true
       );
 
-      if (response.data?.phone!==phone){
+      if (response.data?.phone !== phone) {
         alert(`Kiritilgan pasport ma'lumotlari oldin ro'yxatdan o'tgan. Bog'langan telefon raqami: ${response.data.phone}`);
         return;
       }

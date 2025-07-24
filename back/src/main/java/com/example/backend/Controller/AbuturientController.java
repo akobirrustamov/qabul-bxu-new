@@ -277,6 +277,7 @@ public class AbuturientController {
         if (abuturient1.isPresent()) {
             return ResponseEntity.ok(abuturient1.get());
         }
+
         if (abuturient.getStatus() == 0) {
             District district = null;
             Optional<District> byId = districtRepo.findById(request.getDistrictId());
@@ -302,6 +303,48 @@ public class AbuturientController {
                 System.out.printf("Error in leadStep2: " + e.getMessage());
             }
         }
+        return ResponseEntity.ok(abuturient);
+    }
+    @PutMapping("/user-info/edit")
+    public HttpEntity<?> updateAbuturientUserInfoEdit(@RequestBody AbuturientDTO request) throws IOException {
+        System.out.println(request);
+        Abuturient abuturient = abuturientRepo.findByPhone(request.getPhone());
+        if (Objects.isNull(abuturient)) {
+            return ResponseEntity.ok(null);
+        }
+        System.out.println(abuturient);
+        Optional<Abuturient> abuturient1 = abuturientRepo.findByAbuturientByJshshR(request.getPassportPin());
+        if (abuturient1.isPresent()) {
+            return ResponseEntity.ok(abuturient1.get());
+        }
+
+            District district = null;
+            Optional<District> byId = districtRepo.findById(request.getDistrictId());
+            if (byId.isPresent()) {
+                district = byId.get();
+            }
+        Optional<Abuturient> byAbuturientByJshshR = abuturientRepo.findByAbuturientByJshshR(request.getPassportPin());
+            if (byAbuturientByJshshR.isPresent()) {
+                return ResponseEntity.ok(byAbuturientByJshshR.get());
+            }
+        abuturient.setStatus(4);
+            abuturient.setFirstName(request.getFirstName());
+            abuturient.setLastName(request.getLastName());
+            abuturient.setPhone(request.getPhone());
+            abuturient.setFatherName(request.getFatherName());
+            abuturient.setPassportNumber(request.getPassportNumber());
+            abuturient.setPassportPin(request.getPassportPin());
+            if (request.getLevel() != null) {
+                abuturient.setLevel(abuturient.getLevel());
+            }
+            abuturient.setDistrict(district);
+
+            abuturientRepo.save(abuturient);
+            try{
+                leadStep2(abuturient);
+            }catch (Exception e){
+                System.out.printf("Error in leadStep2: " + e.getMessage());
+            }
         return ResponseEntity.ok(abuturient);
     }
 
@@ -705,9 +748,8 @@ public class AbuturientController {
         }
         try {
             leadStep3(abuturient);
-
         }catch (Exception e){
-            System.out.printf(" fuck");
+            System.out.printf("fuck yourself");
         }
         Document document = new Document(PageSize.A4);
         String filePath = "./Contract_" + phone + ".pdf";
@@ -906,7 +948,7 @@ public class AbuturientController {
             document.add(headerTable);
 
 
-            Paragraph paragraph2 = new Paragraph("O'zbekiston Respublikasi Prezidentining 2021 yil 22-iyundagi PQ-5157 son qarori, Vazirlar Mahkamasining 2017 yil 20 -iyundagi 393-son qarori va universitet kengashining tegishli qarori asosida, bir tomondan BUXORO XALQARO UNIVERSITERI (keyingi o' rinlarda \"Ta'lim muassasasi\") nomidan rektor Baratov Sharif Ramazonovich , ikkinchi tomondan talabalikka tavsiya etilgan talabgor " + fullName + " (keyingi o'rinlarda \"Ta'lim oluvchi\"), birgalikda ”tomonlar” deb ataladigan shaxslar mazkur shartnomani quyidagicha tuzdilar.", regularFont);
+            Paragraph paragraph2 = new Paragraph("O'zbekiston Respublikasi Prezidentining 2021 yil 22-iyundagi PQ-5157 son qarori, Vazirlar Mahkamasining 2017 yil 20 -iyundagi 393-son qarori va universitet kengashining tegishli qarori asosida, bir tomondan BUXORO XALQARO UNIVERSITETI (keyingi o' rinlarda \"Ta'lim muassasasi\") nomidan rektor Baratov Sharif Ramazonovich , ikkinchi tomondan talabalikka tavsiya etilgan talabgor " + fullName + " (keyingi o'rinlarda \"Ta'lim oluvchi\"), birgalikda ”tomonlar” deb ataladigan shaxslar mazkur shartnomani quyidagicha tuzdilar.", regularFont);
             paragraph2.setSpacingBefore(2f);
             document.add(paragraph2);
             //                -----
