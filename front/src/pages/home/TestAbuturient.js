@@ -112,6 +112,7 @@ function TestAbiturient() {
     const getScore = async () => {
         try {
             const response = await ApiCall(`/api/v1/test/score/${phone}`, "GET", null, null, true);
+            console.log("Score response:", response.data);
             if (response.data === null) {
                 navigate("/");
             } else if (response.data) {
@@ -325,6 +326,7 @@ function TestAbiturient() {
     };
 
     const handleSubmitPassportInfo = async () => {
+
         const isValidPassportNumber = /^[A-Z]{2}\d{7}$/.test(abuturient.passportNumber);
         const isValidPassportPin = /^\d{14}$/.test(abuturient.passportPin);
 
@@ -339,17 +341,19 @@ function TestAbiturient() {
         }
 
         setLoading(true);
+
         try {
             const payload = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                fatherName: formData.fatherName,
-                regionId: formData.district.region.id,
-                districtId: formData.district.id,
+                firstName: formData.firstName || "",
+                lastName: formData.lastName || "",
+                fatherName: formData.fatherName || "",
+                regionId: formData?.district?.region?.id || 2,
+                districtId: formData?.district?.id || 18,
                 phone: formData.phone,
                 passportNumber: abuturient.passportNumber,
                 passportPin: abuturient.passportPin
             };
+
             const response = await ApiCall(
                 `/api/v1/abuturient/user-info/edit`,
                 "PUT",
