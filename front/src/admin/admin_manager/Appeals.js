@@ -4,9 +4,23 @@ import ApiCall, { baseUrl } from "../../config";
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 import Select from "react-select";
+import ReactModal from "react-modal";
+import { FaPlus } from "react-icons/fa";
 
 
 function Appeals() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newStudent, setNewStudent] = useState({
+    firstName: "",
+    lastName: "",
+    fatherName: "",
+    phone: "+998",
+    passportNumber: "",
+    passportPin: "",
+    regionId: "",
+    districtId: "",
+  });
+  const [isAdding, setIsAdding] = useState(false);
   const token = localStorage.getItem("access_token");
   const [appeals, setAppeals] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -28,6 +42,131 @@ function Appeals() {
     { value: 2, label: "Hujjat to'liq" },
   ]
   const [admin, setAdmin] = useState()
+
+  const handleAddStudent = async () => {
+    setIsAdding(true);
+    try {
+      // Step 1: Create the student with phone number
+      const token = localStorage.getItem("access_token");
+      const agentId = agents?.[0]?.agent?.id; // Use the first agent or specify one
+      const obj = {
+        phone: newStudent.phone,
+        agentId: agentId,
+        isDtm: true,
+      };
+
+      const createResponse = await ApiCall(
+        `/api/v1/abuturient`,
+        "POST",
+        obj,
+        null,
+        true
+      );
+
+      if (createResponse.data.status !== 0) {
+        // Step 2: Update user info with personal details
+        const userInfo = {
+          firstName: newStudent.firstName,
+          lastName: newStudent.lastName,
+          fatherName: newStudent.fatherName,
+          regionId: newStudent.regionId,
+          districtId: newStudent.districtId,
+          phone: newStudent.phone,
+          passportNumber: newStudent.passportNumber,
+          passportPin: newStudent.passportPin,
+        };
+
+        const userInfoResponse = await ApiCall(
+          `/api/v1/abuturient/user-info`,
+          "PUT",
+          userInfo,
+          null,
+          true
+        );
+
+        if (userInfoResponse.data?.phone !== newStudent.phone) {
+          alert(`Kiritilgan pasport ma'lumotlari oldin ro'yxatdan o'tgan. Bog'langan telefon raqami: ${userInfoResponse.data.phone}`);
+          return;
+        }
+
+        // Step 3: Update with education data (if needed)
+        const educationData = {
+          phone: newStudent.phone,
+          language: true,
+          appealTypeId: "",
+          educationTypeId: "",
+          educationFormId: "",
+          educationFieldId: "",
+          createdAt: new Date().toISOString(),
+        };
+
+        await ApiCall(
+          `/api/v1/abuturient/data-form`,
+          "PUT",
+          educationData,
+          null,
+          true
+        );
+
+        // Refresh the appeals list
+        await fetchAppeals();
+        setIsAddModalOpen(false);
+        setNewStudent({
+          firstName: "",
+          lastName: "",
+          fatherName: "",
+          phone: "+998",
+          passportNumber: "",
+          passportPin: "",
+          regionId: "",
+          districtId: "",
+        });
+      } else {
+        alert("Bu telefon raqam bilan ariza allaqachon mavjud!");
+      }
+    } catch (error) {
+      alert(error?.response?.data?.message || "Xatolik yuz berdi!");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  // Add this function for handling input changes in the add student form
+  const handleNewStudentChange = (e) => {
+    const { name, value } = e.target;
+
+    // Special handling for passport fields
+    if (name === "passportPin") {
+      const numericValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+      if (numericValue.length <= 14) {
+        setNewStudent(prev => ({ ...prev, [name]: numericValue }));
+      }
+      return;
+    }
+
+    if (name === "passportNumber") {
+      const formattedValue = value.toUpperCase(); // Convert to uppercase
+      const letters = formattedValue.slice(0, 2).replace(/[^A-Z]/g, ""); // First 2 capital letters
+      const numbers = formattedValue.slice(2).replace(/\D/g, ""); // Remaining numeric characters
+      const passportNumber = `${letters}${numbers.slice(0, 7)}`; // Combine letters and up to 7 numbers
+      setNewStudent(prev => ({ ...prev, [name]: passportNumber }));
+      return;
+    }
+
+    if (name === "phone") {
+      // Ensure phone starts with +998 and has up to 12 digits total
+      let phoneValue = value;
+      if (!value.startsWith("+998")) {
+        phoneValue = "+998";
+      } else if (value.length > 13) {
+        phoneValue = value.slice(0, 13);
+      }
+      setNewStudent(prev => ({ ...prev, [name]: phoneValue }));
+      return;
+    }
+
+    setNewStudent(prev => ({ ...prev, [name]: value }));
+  };
   const fetchAdmin = async () => {
     try {
       const response = await ApiCall(
@@ -358,7 +497,7 @@ function Appeals() {
       firstName: "",
       lastName: "",
       fatherName: "",
-      motherName:"",
+      motherName: "",
       passportNumber: "",
       passportPin: "",
       phone: "",
@@ -590,8 +729,160 @@ function Appeals() {
     <div>
       <Sidebar />
       <div className="p-10 sm:ml-64">
-        <h2 className="text-3xl">Kelib tushgan arizalar</h2>
+        <div className="flex gap-10 items-center mb-4">
+          <h2 className="text-3xl">Kelib tushgan arizalar</h2>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-green-600 text-white py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-green-700 transition"
+          >
+            <FaPlus /> Talaba qo'shish
+          </button>
 
+        </div>
+        <Modal
+          open={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          center
+          classNames={{
+            modal: "rounded-lg p-6 max-w-2xl w-full",
+          }}
+        >
+          <h2 className="text-xl font-bold mb-4 text-[#213972]">Yangi Talaba Qo'shish</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Familiya</label>
+              <input
+                type="text"
+                name="lastName"
+                value={newStudent.lastName}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ism</label>
+              <input
+                type="text"
+                name="firstName"
+                value={newStudent.firstName}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Otasining ismi</label>
+              <input
+                type="text"
+                name="fatherName"
+                value={newStudent.fatherName}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefon raqam</label>
+              <input
+                type="tel"
+                name="phone"
+                value={newStudent.phone}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Passport seriyasi</label>
+              <input
+                type="text"
+                name="passportNumber"
+                value={newStudent.passportNumber}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                placeholder="AB1234567"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Passport raqami</label>
+              <input
+                type="text"
+                name="passportPin"
+                value={newStudent.passportPin}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                placeholder="12345678901234"
+                required
+              />
+            </div>
+
+            {/* Add region and district selection if needed */}
+            {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Viloyat</label>
+              <select
+                name="regionId"
+                value={newStudent.regionId}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+              >
+                <option value="">Viloyatni tanlang</option>
+                {regions.map(region => (
+                  <option key={region.id} value={region.id}>{region.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tuman</label>
+              <select
+                name="districtId"
+                value={newStudent.districtId}
+                onChange={handleNewStudentChange}
+                className="w-full p-2 border rounded"
+                required
+                disabled={!newStudent.regionId}
+              >
+                <option value="">Tumanni tanlang</option>
+                {districts
+                  .filter(d => d.regionId === newStudent.regionId)
+                  .map(district => (
+                    <option key={district.id} value={district.id}>{district.name}</option>
+                  ))}
+              </select>
+            </div> */}
+          </div>
+
+          <div className="flex justify-end mt-6 space-x-3">
+            <button
+              onClick={() => setIsAddModalOpen(false)}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleAddStudent}
+              className="bg-[#213972] text-white py-2 px-4 rounded-lg"
+              disabled={isAdding ||
+                !newStudent.firstName ||
+                !newStudent.lastName ||
+                !newStudent.fatherName ||
+                !newStudent.phone ||
+                !newStudent.passportNumber ||
+                !newStudent.passportPin}
+            >
+              {isAdding ? "Qo'shilmoqda..." : "Qo'shish"}
+            </button>
+          </div>
+        </Modal>
         {/* Filter Section */}
         <div className=" bg-white p-4 rounded-lg shadow-md">
           {showFilter && (
@@ -1319,6 +1610,8 @@ function Appeals() {
             </button>
           </div>
         </Modal>
+
+
       </div>
     </div>
   );

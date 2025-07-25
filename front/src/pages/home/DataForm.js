@@ -6,6 +6,7 @@ import Select from "react-select";
 import { FaTelegramPlane, FaFacebookF, FaYoutube, FaInstagram, FaGlobe } from "react-icons/fa";
 import Loading from "./Loading";
 
+
 function DataForm() {
   const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
