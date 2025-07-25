@@ -199,6 +199,7 @@ public class AdminController {
             return ResponseEntity.notFound().build();
         }
         Abuturient abuturient = optionalAbuturient.get();
+        abuturient.setStatus(2);
         Optional<EducationField> edu = educationFieldRepo.findById(dto.getEducationFieldId());
         Optional<AppealType> appealType = appealTypeRepo.findById(dto.getAppealTypeId());
         if (!edu.isPresent()) {

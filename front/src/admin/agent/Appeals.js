@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from "./Sidebar";
-import ApiCall, {baseUrl} from "../../config";
+import ApiCall, { baseUrl } from "../../config";
 import 'react-responsive-modal/styles.css';
-import {useNavigate} from "react-router-dom";
-import {Modal} from "react-responsive-modal";
+import { useNavigate } from "react-router-dom";
+import { Modal } from "react-responsive-modal";
 
 function Appeals() {
     const [appeals, setAppeals] = useState([]);
@@ -33,10 +33,10 @@ function Appeals() {
         fetchEducationType();
     }, []);
 
-    const fetchAppeals = async ()=>{
+    const fetchAppeals = async () => {
         const token = localStorage.getItem("access_token");
         try {
-            const response = await ApiCall('/api/v1/agent/appeals/'+token, 'GET', null, null, true);
+            const response = await ApiCall('/api/v1/agent/appeals/' + token, 'GET', null, null, true);
             setAppeals(response.data);
         } catch (error) {
             console.error("Error fetching news:", error);
@@ -89,45 +89,51 @@ function Appeals() {
         setEditModalOpen(true);
     };
 
-    const handleDownloadPDF = async (phone) => {
-        try {
-            const response = await fetch(`${baseUrl}/api/v1/abuturient/contract/${phone}`, {
-                method: 'GET',
-            });
+    const handleDownloadPDF = async (appeal) => {
+        if (appeal.passportPin) {
+            let phone = appeal.phone;
+            try {
+                const response = await fetch(`${baseUrl}/api/v1/abuturient/contract/${phone}`, {
+                    method: 'GET',
+                });
 
-            if (!response.ok) {
-                throw new Error("Failed to download file");
+                if (!response.ok) {
+                    throw new Error("Failed to download file");
+                }
+
+                const contentType = response.headers.get('Content-Type');
+                if (!contentType || !contentType.includes('application/pdf')) {
+                    throw new Error("The response is not a valid PDF file.");
+                }
+
+                const blob = await response.blob();
+                if (!blob.size) {
+                    throw new Error("The PDF file is empty.");
+                }
+
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `Contract_${phone}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+
+                // Cleanup
+                link.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+
+                console.log("PDF downloaded successfully");
+            } catch (error) {
+                console.error("Error downloading PDF:", error);
             }
-
-            const contentType = response.headers.get('Content-Type');
-            if (!contentType || !contentType.includes('application/pdf')) {
-                throw new Error("The response is not a valid PDF file.");
-            }
-
-            const blob = await response.blob();
-            if (!blob.size) {
-                throw new Error("The PDF file is empty.");
-            }
-
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `Contract_${phone}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-
-            // Cleanup
-            link.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-
-            console.log("PDF downloaded successfully");
-        } catch (error) {
-            console.error("Error downloading PDF:", error);
+        } else {
+            alert("Passport JSHSHIR mavjud emas, Shartnomani yuklab bo'lmaydi.");
+            return;
         }
     };
     const handlePageChange = async (newPage) => {
         if (newPage >= 0 && newPage < pagination.totalPages) {
-            setPagination((prev) => ({...prev, pageNumber: newPage}));
+            setPagination((prev) => ({ ...prev, pageNumber: newPage }));
 
             await fetchAppeals()
         }
@@ -143,11 +149,10 @@ function Appeals() {
             <button
                 key={1}
                 onClick={() => handlePageChange(0)}
-                className={`px-4 py-2 rounded-md ${
-                    pagination.pageNumber === 0
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-md ${pagination.pageNumber === 0
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                    }`}
             >
                 1
             </button>
@@ -168,11 +173,10 @@ function Appeals() {
                 <button
                     key={i + 1}
                     onClick={() => handlePageChange(i)}
-                    className={`px-4 py-2 rounded-md ${
-                        pagination.pageNumber === i
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${pagination.pageNumber === i
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 hover:bg-gray-300"
+                        }`}
                 >
                     {i + 1}
                 </button>
@@ -190,11 +194,10 @@ function Appeals() {
                 <button
                     key={totalPages}
                     onClick={() => handlePageChange(totalPages - 1)}
-                    className={`px-4 py-2 rounded-md ${
-                        pagination.pageNumber === totalPages - 1
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${pagination.pageNumber === totalPages - 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 hover:bg-gray-300"
+                        }`}
                 >
                     {totalPages}
                 </button>
@@ -231,7 +234,7 @@ function Appeals() {
         setEditData((prev) => ({ ...prev, [name]: value }));
     };
     const validateInputs = () => {
-        if( editData.passportPin.length>0 || editData.passportNumber.length>0){
+        if (editData.passportPin.length > 0 || editData.passportNumber.length > 0) {
             if (
                 editData.passportPin.length !== 14 ||
                 !/^[A-Z]{2}\d{7}$/.test(editData.passportNumber) || // 2 capital letters + 9 digits
@@ -243,7 +246,7 @@ function Appeals() {
                 return false;
             }
 
-        }else {
+        } else {
             if (
                 !editData.firstName.trim() ||
                 !editData.lastName.trim()
@@ -306,86 +309,85 @@ function Appeals() {
 
                 <table className="min-w-full mt-4 border-collapse border border-gray-300">
                     <thead>
-                    <tr className="bg-gray-100">
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">N%</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">FIO</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Passport</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Telefon</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Ariza turi</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Ta'lim turi</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Ta'lim shakli</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Yonalishi</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Agent</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Sana</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Status</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]">Ball</th>
-                        <th className="border border-gray-300 px-1 py-1 text-[14px]"></th>
-                    </tr>
+                        <tr className="bg-gray-100">
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">N%</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">FIO</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Passport</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Telefon</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Ariza turi</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Ta'lim turi</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Ta'lim shakli</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Yonalishi</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Agent</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Sana</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Status</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]">Ball</th>
+                            <th className="border border-gray-300 px-1 py-1 text-[14px]"></th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {appeals.map((appeal, index) => (
-                        <tr key={index} className="group border-t border-gray-200 hover:border-blue-500 hover:bg-blue-50 hover:border-l-green-400 transition-all">
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{index + 1}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[12px]">{`${appeal.lastName} ${appeal.firstName} ${appeal.fatherName}`}</td>
-                            <td
-                                className={`border border-gray-200 px-1 py-1 text-[14px] ${
-                                    (!appeal.passportPin && !appeal.passportNumber) ? 'bg-red-400' : ''
-                                }`}
-                            >
-                                {`${appeal.passportPin || ''} ${appeal.passportNumber || ''}`}
-                            </td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">
-                                {appeal.phone.trim()}
-                            </td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.appealType?.name}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.educationForm?.educationType?.name}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.educationForm?.name}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.name}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.agent?.name}</td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">
-                                {new Date(appeal.createdAt).toLocaleString()}
-                            </td>
-                            <td className="border border-gray-200 px-1 py-1 text-[10px]">
-                                {appeal.status === 1 && "Telefon raqam kiritgan"}
-                                {appeal.status === 2 && "Ma'lumot kiritgan"}
-                                {appeal.status === 3 && "Test yechgan"}
-                                {appeal.status === 4 && "Shartnoma olgan"}
-                            </td>
-                            <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.ball}</td>
-
-                            <td className="border border-gray-200 px-1 py-1 text-[14px] d-flex gap-1">
-                                <button
-                                    className="text-white bg-blue-600 rounded p-1 hover:underline"
-                                    onClick={() => handleEditClick(appeal)}
+                        {appeals.map((appeal, index) => (
+                            <tr key={index} className="group border-t border-gray-200 hover:border-blue-500 hover:bg-blue-50 hover:border-l-green-400 transition-all">
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{index + 1}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[12px]">{`${appeal.lastName} ${appeal.firstName} ${appeal.fatherName}`}</td>
+                                <td
+                                    className={`border border-gray-200 px-1 py-1 text-[14px] ${(!appeal.passportPin && !appeal.passportNumber) ? 'bg-red-400' : ''
+                                        }`}
                                 >
-                                    <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                         viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
-                                    </svg>
-                                </button>
-                                {appeal?.ball>40&&
+                                    {`${appeal.passportPin || ''} ${appeal.passportNumber || ''}`}
+                                </td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">
+                                    {appeal.phone.trim()}
+                                </td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.appealType?.name}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.educationForm?.educationType?.name}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.educationForm?.name}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.educationField?.name}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.agent?.name}</td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">
+                                    {new Date(appeal.createdAt).toLocaleString()}
+                                </td>
+                                <td className="border border-gray-200 px-1 py-1 text-[10px]">
+                                    {appeal.status === 1 && "Telefon raqam kiritgan"}
+                                    {appeal.status === 2 && "Ma'lumot kiritgan"}
+                                    {appeal.status === 3 && "Test yechgan"}
+                                    {appeal.status === 4 && "Shartnoma olgan"}
+                                </td>
+                                <td className="border border-gray-200 px-1 py-1 text-[14px]">{appeal.ball}</td>
+
+                                <td className="border border-gray-200 px-1 py-1 text-[14px] d-flex gap-1">
                                     <button
-                                        className="text-white bg-green-600 rounded p-1 hover:underline"
-                                        onClick={() => handleDownloadPDF(appeal.phone)}
+                                        className="text-white bg-blue-600 rounded p-1 hover:underline"
+                                        onClick={() => handleEditClick(appeal)}
                                     >
-
                                         <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                             viewBox="0 0 24 24">
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                            viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/>
+                                                stroke-width="2"
+                                                d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
                                         </svg>
-
                                     </button>
-                                }
-                            </td>
+                                    {appeal?.ball > 40 &&
+                                        <button
+                                            className="text-white bg-green-600 rounded p-1 hover:underline"
+                                            onClick={() => handleDownloadPDF(appeal)}
+                                        >
 
-                        </tr>
-                    ))}
+                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                                viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z" />
+                                            </svg>
+
+                                        </button>
+                                    }
+                                </td>
+
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
 
@@ -396,9 +398,9 @@ function Appeals() {
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-300"
                     >
                         <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 6v12m8-12v12l-8-6 8-6Z"/>
+                                d="M8 6v12m8-12v12l-8-6 8-6Z" />
                         </svg>
 
                     </button>
@@ -409,9 +411,9 @@ function Appeals() {
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-300"
                     >
                         <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M16 6v12M8 6v12l8-6-8-6Z"/>
+                                d="M16 6v12M8 6v12l8-6-8-6Z" />
                         </svg>
 
                     </button>

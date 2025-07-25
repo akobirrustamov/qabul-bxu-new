@@ -148,6 +148,8 @@ function BgImage() {
       };
 
       const response = await ApiCall(`/api/v1/abuturient`, "POST", obj, null, true);
+      console.log(response.data);
+      
       if (response.data.status!==0){
         await getPhoneData(response);
       }
