@@ -354,43 +354,49 @@ function Appeals() {
     // Open the modal
     setEditModalOpen(true);
   };
-  const handleDownloadPDF = async (phone) => {
-    try {
-      const response = await fetch(
-        `${baseUrl}/api/v1/abuturient/contract02/${phone}`,
-        {
-          method: "GET",
+  const handleDownloadPDF = async (appeal) => {
+    if (appeal.passportPin) {
+      let phone = appeal.phone
+      try {
+        const response = await fetch(
+          `${baseUrl}/api/v1/abuturient/contract02/${phone}`,
+          {
+            method: "GET",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to download file");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to download file");
+        const contentType = response.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/pdf")) {
+          throw new Error("The response is not a valid PDF file.");
+        }
+
+        const blob = await response.blob();
+        if (!blob.size) {
+          throw new Error("The PDF file is empty.");
+        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `Contract_${phone}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+
+        console.log("PDF downloaded successfully");
+      } catch (error) {
+        console.error("Error downloading PDF:", error);
       }
-
-      const contentType = response.headers.get("Content-Type");
-      if (!contentType || !contentType.includes("application/pdf")) {
-        throw new Error("The response is not a valid PDF file.");
-      }
-
-      const blob = await response.blob();
-      if (!blob.size) {
-        throw new Error("The PDF file is empty.");
-      }
-
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = `Contract_${phone}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      link.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-
-      console.log("PDF downloaded successfully");
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
+    } else {
+      alert("Passport JSHSHIR mavjud emas, Shartnomani yuklab bo'lmaydi.");
+      return;
     }
   };
   const handleInputChange = async (e) => {
@@ -888,7 +894,7 @@ function Appeals() {
                   {appeal?.ball > 40 && (
                     <button
                       className="text-white bg-green-600 rounded p-1 hover:underline"
-                      onClick={() => handleDownloadPDF(appeal.phone)}
+                      onClick={() => handleDownloadPDF(appeal)}
                     >
                       <svg
                         className="w-6 h-6 text-gray-800 dark:text-white"
