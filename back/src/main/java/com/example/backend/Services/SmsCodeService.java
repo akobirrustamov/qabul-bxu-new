@@ -20,6 +20,7 @@ public class SmsCodeService {
             String password = "qCfkQTHQbQAJLJeElWWI9bv1stjoh3Unt6dNiE04";
             String loginUrl = "https://notify.eskiz.uz/api/auth/login";
 
+            // 1. Auth - token olish
             Map<String, String> loginPayload = new HashMap<>();
             loginPayload.put("email", email);
             loginPayload.put("password", password);
@@ -27,14 +28,16 @@ public class SmsCodeService {
             Map loginResponse = restTemplate.postForObject(loginUrl, loginPayload, Map.class);
             String token = (String) ((Map) loginResponse.get("data")).get("token");
 
+            // 2. Template olish
             String templateUrl = "https://notify.eskiz.uz/api/user/templates";
             HttpEntity<Void> entity = new HttpEntity<>(createHeaders(token));
             Map templatesResponse = restTemplate.exchange(templateUrl, HttpMethod.GET, entity, Map.class).getBody();
+
+            // 3. Template matnidan foydalanish va kodni joylashtirish
             String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(0)).get("template");
-
-            String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + phoneNumber;
-            String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", phoneNumber);
-
+            String finalMessage = String.format(template, code); // %d joyga kod qo‘yiladi
+            System.out.printf("SMS Code: %s\n", finalMessage);
+            // 4. SMS yuborish
             String smsUrl = "https://notify.eskiz.uz/api/message/sms/send";
             Map<String, String> smsPayload = new HashMap<>();
             smsPayload.put("mobile_phone", phoneNumber);
@@ -43,13 +46,14 @@ public class SmsCodeService {
 
             HttpEntity<Map<String, String>> smsEntity = new HttpEntity<>(smsPayload, createHeaders(token));
             restTemplate.postForObject(smsUrl, smsEntity, Map.class);
+            System.out.printf("SMS Code: %s\n", smsEntity);
             return true;
         } catch (Exception e) {
-            System.out.printf("Error: %s", e.getMessage());
+            System.out.printf("Error: %s%n", e.getMessage());
             return false;
-//                return new ResponseEntity<>("SMS sending failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     private HttpHeaders createHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();

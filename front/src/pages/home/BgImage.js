@@ -148,6 +148,9 @@ function BgImage() {
       };
 
       const response = await ApiCall(`/api/v1/abuturient`, "POST", obj, null, true);
+      if (response.data.status!==0){
+        await getPhoneData(response);
+      }
       setAbuturientId(response.data.id);
       setShowSmsInput(true);
       startTimer();
@@ -170,8 +173,9 @@ function BgImage() {
         null,
         true
       );
+      console.log(response.data)
 
-      if (response.success) {
+      if (response.data.phone==tel) {
         await getPhoneData(response);
         setShowSmsInput(false);
       } else {

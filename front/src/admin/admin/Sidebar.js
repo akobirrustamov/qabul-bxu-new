@@ -13,7 +13,6 @@ function Sidebar() {
     { to: "/admin/appeal", label: "Kelib tushgan arizalar" },
     { to: "/admin/transform-education", label: "O'qishni ko'chirish arizalar" },
     { to: "/admin/history", label: "Kunlik Faollik" },
-    { to: "/admin/agent", label: "Agentlar" },
   ];
 
   return (

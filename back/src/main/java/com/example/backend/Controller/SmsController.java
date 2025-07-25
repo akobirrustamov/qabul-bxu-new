@@ -24,16 +24,18 @@ public class SmsController {
     @GetMapping("/{abuturientId}/{code}")
     public HttpEntity<?> sendSms(@PathVariable UUID abuturientId, @PathVariable Integer code) {
         Optional<SmsCode> smsCodeOpt = smsCodeRepo.findByAbuturientId(abuturientId);
-
+        System.out.printf("AbuturientId : %s | Code : %s \n", abuturientId, code);
+        System.out.printf("SmsCode : %s \n", smsCodeOpt);
         if (smsCodeOpt.isPresent()) {
             SmsCode smsCode = smsCodeOpt.get();
-
+            System.out.print(smsCode);
 
             // Kod noto'g'ri yoki muddati tugagan bo'lsa
             if (!smsCode.getCode().equals(code) || LocalDateTime.now().isAfter(smsCode.getExpireTime())) {
                 return ResponseEntity.status(403).body("Kod noto‘g‘ri yoki eskirgan");
             }
 
+            System.out.printf("SmsCode : %s \n", smsCode);
             smsCodeRepo.delete(smsCode);
             return ResponseEntity.ok(smsCode.getAbuturient());
         }

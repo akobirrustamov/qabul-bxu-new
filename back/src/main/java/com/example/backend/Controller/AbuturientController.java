@@ -132,78 +132,98 @@ public class AbuturientController {
     }
 
     @PostMapping
-    public HttpEntity<?> addAbuturient(@RequestHeader("Authorization") String token,
-                                       @RequestBody AbuturientDTO request) {
-        System.out.printf("AbuturientDTO: %s\n", request);
-        System.out.printf("token: %s\n", token);
+    public HttpEntity<?> addAbuturient(@RequestBody AbuturientDTO request) {
 
         Optional<Abuturient> byPhone = abuturientRepo.findByPhoneOptional(request.getPhone());
         if(byPhone.isPresent()){
-            if (request.getAgentId() == null || request.getAgentId() == 3603) {
+
+            UUID targetAgentId = UUID.fromString("cf8aeeef-c3ab-439e-8b77-8ef05f13e425");
+
+            if ((request.getAgentId() == null || request.getAgentId() == 3603)) {
                 Abuturient abuturient = byPhone.get();
-                abuturient.setIsUniversity(true);
-                abuturientRepo.save(abuturient);
+                User agent = abuturient.getAgent();
+
+                if (agent != null && targetAgentId.equals(agent.getId())) {
+                    abuturient.setIsUniversity(true);
+                    abuturientRepo.save(abuturient);
+                }
             }
+
+
+            if (byPhone.get().getStatus() <1) {
+               return sendSmsCode(byPhone.get(), byPhone.get());
+            }
+            System.out.print("1");
             return ResponseEntity.ok(byPhone.get());
         }
+        System.out.print("2");
 
-        // 🔐 Token check
-        if (token == null ) {
-            return ResponseEntity.status(401).body("Iltimos odam bo'laylik");
-        }
+//        // 🔐 Token check
+//        if (token == null ) {
+//            return ResponseEntity.status(401).body("Iltimos odam bo'laylik");
+//        }
+//        System.out.print("3");
 
-        String pureToken = token; // remove "Bearer "
-        System.out.printf("token: %s\n", pureToken);
-        Optional<BrowserToken> browserToken= browserTokenRepository.findByToken(pureToken);
-        if (browserToken.isEmpty()) {
-            return ResponseEntity.status(401).body("Iltimos odam bo'laylik2");
-        }
-        if (!browserToken.get().getIsActive()){
-            return ResponseEntity.status(401).body("Iltimos odam bo'laylik3");
-        }
-        BrowserToken browserToken1 = browserToken.get();
-        browserToken1.setIsActive(false);
-        browserTokenRepository.save(browserToken1);
+//        String pureToken = token; // remove "Bearer "
+//        System.out.printf("token: %s\n", pureToken);
+//        Optional<BrowserToken> browserToken= browserTokenRepository.findByToken(pureToken);
+//        if (browserToken.isEmpty()) {
+//            return ResponseEntity.status(401).body("Iltimos odam bo'laylik2");
+//        }
+//        if (!browserToken.get().getIsActive()){
+//            return ResponseEntity.status(401).body("Iltimos odam bo'laylik3");
+//        }
+//        BrowserToken browserToken1 = browserToken.get();
+//        browserToken1.setIsActive(false);
+//        browserTokenRepository.save(browserToken1);
         // 🎯 Continue if token is valid
+
+
         Optional<AgentPath> byAgentNumber = agentPathRepo.findByAgentNumber(request.getAgentId());
         User agent = null;
         if (byAgentNumber.isPresent()) {
             agent = byAgentNumber.get().getAgent();
         }
-
         try {
-            Abuturient abuturient = new Abuturient(
-                    request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber()
-            );
+            Abuturient abuturient = new Abuturient(request.getPhone(), agent, 0, LocalDateTime.now(), contractNumber());
             abuturient.setIsDtm(request.getIsDtm());
             Abuturient save = abuturientRepo.save(abuturient);
-
-            Random random = new Random(); // xavfsizlik uchun: new SecureRandom();
-            int code = 1000 + random.nextInt(9000); // 1000–9999 oralig‘ida
-
-            Boolean b = smsCodeService.sendSmsCode(abuturient.getPhone(), code);
-
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime expiryTime = now.plusMinutes(2);
-            Optional<SmsCode> byAbuturientId = smsCodeRepo.findByAbuturientId(save.getId());
-            if (byAbuturientId.isPresent()) {
-                if (LocalDateTime.now().isAfter(byAbuturientId.get().getExpireTime())){
-                    smsCodeRepo.delete(byAbuturientId.get());
-                }
-                return ResponseEntity.noContent().build();
-            }
-            SmsCode smsCode = new SmsCode(code,save,LocalDateTime.now(), expiryTime);
-
-            if (b) {
-                return ResponseEntity.ok(save);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+            leadStep1(request.getPhone(), save);
+            return sendSmsCode(save, abuturient);
 
 
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error saving Abuturient: " + e.getMessage());
+        }
+    }
+
+    private HttpEntity<?> sendSmsCode(Abuturient save, Abuturient abuturient) {
+        Random random = new Random();
+        int code = 1000 + random.nextInt(9000); // 1000–9999 oralig‘ida
+        Boolean b =false;
+        System.out.printf("code: %s\n", code);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiryTime = now.plusMinutes(2);
+        Optional<SmsCode> byAbuturientId = smsCodeRepo.findByAbuturientId(save.getId());
+        if (byAbuturientId.isPresent()) {
+            if (LocalDateTime.now().isAfter(byAbuturientId.get().getExpireTime())){
+                smsCodeRepo.delete(byAbuturientId.get());
+            }
+            return ResponseEntity.noContent().build();
+        }
+        SmsCode smsCode = new SmsCode(code,save,LocalDateTime.now(), expiryTime);
+        smsCodeRepo.save(smsCode);
+        try {
+            b = smsCodeService.sendSmsCode(abuturient.getPhone(), code);
+
+        }catch (Exception e){
+            System.out.printf("error sebding message: %s\n", abuturient);
+        }
+        if (b) {
+            return ResponseEntity.ok(save);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
