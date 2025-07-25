@@ -136,8 +136,11 @@ public class AbuturientController {
 
         Optional<Abuturient> byPhone = abuturientRepo.findByPhoneOptional(request.getPhone());
         if(byPhone.isPresent()){
-
+//bexruz
             UUID targetAgentId = UUID.fromString("cf8aeeef-c3ab-439e-8b77-8ef05f13e425");
+
+//            test
+//            UUID targetAgentId = UUID.fromString("74053079-b947-4fca-a825-92c0deab79bc");
 
             if ((request.getAgentId() == null || request.getAgentId() == 3603)) {
                 Abuturient abuturient = byPhone.get();
@@ -1184,7 +1187,9 @@ public class AbuturientController {
                 leftCell1.addElement(new Paragraph("Hisob raqami: 20208000305439719002", regularFont));
 
             } else {
-                if (abuturient.getIsUniversity()){
+                if (abuturient.getAgent() != null) {
+                    leftCell1.addElement(new Paragraph("Hisob raqami: 20208000105439719001", regularFont));
+                } else if (abuturient.getIsUniversity()){
                     leftCell1.addElement(new Paragraph("Hisob raqami: 20208000305439719002", regularFont));
 
                 }else {
