@@ -69,6 +69,7 @@ const EducationForm = () => {
             id: form.id,
             name: form.name,
             educationTypeId: form.educationType.id,
+            description: form.description,
             isActive: form.isActive,
         });
         setIsModalOpen(true);
