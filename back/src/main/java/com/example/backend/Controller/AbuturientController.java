@@ -140,10 +140,8 @@ public class AbuturientController {
         if(byPhone.isPresent()){
 //bexruz
             UUID targetAgentId = UUID.fromString("cf8aeeef-c3ab-439e-8b77-8ef05f13e425");
-
 //            test
 //            UUID targetAgentId = UUID.fromString("74053079-b947-4fca-a825-92c0deab79bc");
-
             if ((request.getAgentId() == null || request.getAgentId() == 3603)) {
                 Abuturient abuturient = byPhone.get();
                 User agent = abuturient.getAgent();
@@ -153,8 +151,6 @@ public class AbuturientController {
                     abuturientRepo.save(abuturient);
                 }
             }
-
-
             if (byPhone.get().getStatus() <1) {
                return sendSmsCode(byPhone.get(), byPhone.get());
             }
@@ -162,13 +158,11 @@ public class AbuturientController {
             return ResponseEntity.ok(byPhone.get());
         }
         System.out.print("2");
-
 //        // 🔐 Token check
 //        if (token == null ) {
 //            return ResponseEntity.status(401).body("Iltimos odam bo'laylik");
 //        }
 //        System.out.print("3");
-
 //        String pureToken = token; // remove "Bearer "
 //        System.out.printf("token: %s\n", pureToken);
 //        Optional<BrowserToken> browserToken= browserTokenRepository.findByToken(pureToken);
@@ -182,8 +176,6 @@ public class AbuturientController {
 //        browserToken1.setIsActive(false);
 //        browserTokenRepository.save(browserToken1);
         // 🎯 Continue if token is valid
-
-
         Optional<AgentPath> byAgentNumber = agentPathRepo.findByAgentNumber(request.getAgentId());
         User agent = null;
         if (byAgentNumber.isPresent()) {
@@ -195,14 +187,10 @@ public class AbuturientController {
             Abuturient save = abuturientRepo.save(abuturient);
             leadStep1(request.getPhone(), save);
             return sendSmsCode(save, abuturient);
-
-
-
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error saving Abuturient: " + e.getMessage());
         }
     }
-
     private HttpEntity<?> sendSmsCode(Abuturient save, Abuturient abuturient) {
         Random random = new Random();
         int code = 1000 + random.nextInt(9000); // 1000–9999 oralig‘ida
@@ -221,7 +209,6 @@ public class AbuturientController {
         smsCodeRepo.save(smsCode);
         try {
             b = smsCodeService.sendSmsCode(abuturient.getPhone(), code);
-
         }catch (Exception e){
             System.out.printf("error sebding message: %s\n", abuturient);
         }
@@ -1021,7 +1008,10 @@ public class AbuturientController {
             PdfPCell leftDetailCell = new PdfPCell();
             leftDetailCell.setBorder(Rectangle.BOX);
             leftDetailCell.addElement(new Paragraph("Ta'lim bosqichi: " + abuturient.getEducationField().getEducationForm().getEducationType().getName(), regularFont));
-            leftDetailCell.addElement(new Paragraph("Ta'lim shakli: " + abuturient.getEducationField().getEducationForm().getName(), regularFont));
+            String educationFormText = abuturient.getEducationField().getEducationForm().getDescription() != null && !abuturient.getEducationField().getEducationForm().getDescription().isEmpty()
+                    ? abuturient.getEducationField().getEducationForm().getDescription()
+                    : abuturient.getEducationField().getEducationForm().getName();
+            leftDetailCell.addElement(new Paragraph("Ta'lim shakli: " + educationFormText, regularFont));
             leftDetailCell.addElement(new Paragraph("Ta'lim yo'nalishi: " + abuturient.getEducationField().getName(), regularFont));
             detailsTable.addCell(leftDetailCell);
 
@@ -1506,7 +1496,12 @@ public class AbuturientController {
             PdfPCell leftDetailCell = new PdfPCell();
             leftDetailCell.setBorder(Rectangle.BOX);
             leftDetailCell.addElement(new Paragraph("Ta'lim bosqichi: " + abuturient.getEducationField().getEducationForm().getEducationType().getName(), regularFont));
-            leftDetailCell.addElement(new Paragraph("Ta'lim shakli: " + abuturient.getEducationField().getEducationForm().getName(), regularFont));
+            String educationFormText = abuturient.getEducationField().getEducationForm().getDescription() != null &&
+                    !abuturient.getEducationField().getEducationForm().getDescription().isEmpty()
+                    ? abuturient.getEducationField().getEducationForm().getDescription()
+                    : abuturient.getEducationField().getEducationForm().getName();
+
+            leftDetailCell.addElement(new Paragraph("Ta'lim shakli: " + educationFormText, regularFont));
             leftDetailCell.addElement(new Paragraph("Ta'lim yo'nalishi: " + abuturient.getEducationField().getName(), regularFont));
             detailsTable.addCell(leftDetailCell);
 
