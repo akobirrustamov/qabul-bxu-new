@@ -5,6 +5,30 @@ import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 
 function Transform() {
+
+  // edit qilish uchun button
+  // <button
+  //   className="text-white bg-blue-600 rounded p-1 hover:underline"
+  //   onClick={() => handleEditClick(appeal)}
+  // >
+  //   <svg
+  //     className="w-6 h-6 text-gray-800 dark:text-white"
+  //     aria-hidden="true"
+  //     xmlns="http://www.w3.org/2000/svg"
+  //     width="24"
+  //     height="24"
+  //     fill="none"
+  //     viewBox="0 0 24 24"
+  //   >
+  //     <path
+  //       stroke="currentColor"
+  //       stroke-linecap="round"
+  //       stroke-linejoin="round"
+  //       stroke-width="2"
+  //       d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"
+  //     />
+  //   </svg>
+  // </button>
   const [appeals, setAppeals] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [appealType, setAppealType] = useState([]);
@@ -149,11 +173,10 @@ function Transform() {
       <button
         key={1}
         onClick={() => handlePageChange(0)}
-        className={`px-4 py-2 rounded-md ${
-          pagination.pageNumber === 0
-            ? "bg-blue-500 text-white"
-            : "bg-gray-200 hover:bg-gray-300"
-        }`}
+        className={`px-4 py-2 rounded-md ${pagination.pageNumber === 0
+          ? "bg-blue-500 text-white"
+          : "bg-gray-200 hover:bg-gray-300"
+          }`}
       >
         1
       </button>
@@ -174,11 +197,10 @@ function Transform() {
         <button
           key={i + 1}
           onClick={() => handlePageChange(i)}
-          className={`px-4 py-2 rounded-md ${
-            pagination.pageNumber === i
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 hover:bg-gray-300"
-          }`}
+          className={`px-4 py-2 rounded-md ${pagination.pageNumber === i
+            ? "bg-blue-500 text-white"
+            : "bg-gray-200 hover:bg-gray-300"
+            }`}
         >
           {i + 1}
         </button>
@@ -196,11 +218,10 @@ function Transform() {
         <button
           key={totalPages}
           onClick={() => handlePageChange(totalPages - 1)}
-          className={`px-4 py-2 rounded-md ${
-            pagination.pageNumber === totalPages - 1
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 hover:bg-gray-300"
-          }`}
+          className={`px-4 py-2 rounded-md ${pagination.pageNumber === totalPages - 1
+            ? "bg-blue-500 text-white"
+            : "bg-gray-200 hover:bg-gray-300"
+            }`}
         >
           {totalPages}
         </button>
@@ -773,11 +794,10 @@ function Transform() {
                 </td>
                 <td className="border border-gray-200 px-1 py-1 text-[12px]">{`${appeal.lastName} ${appeal.firstName} ${appeal.fatherName}`}</td>
                 <td
-                  className={`border border-gray-200 px-1 py-1 text-[14px] ${
-                    !appeal.passportPin && !appeal.passportNumber
-                      ? "bg-red-400"
-                      : ""
-                  }`}
+                  className={`border border-gray-200 px-1 py-1 text-[14px] ${!appeal.passportPin && !appeal.passportNumber
+                    ? "bg-red-400"
+                    : ""
+                    }`}
                 >
                   {`${appeal.passportPin || ""} ${appeal.passportNumber || ""}`}
                 </td>
@@ -836,28 +856,7 @@ function Transform() {
                 </td>
 
                 <td className="border border-gray-200 px-1 py-1 text-[14px] d-flex gap-1">
-                  <button
-                    className="text-white bg-blue-600 rounded p-1 hover:underline"
-                    onClick={() => handleEditClick(appeal)}
-                  >
-                    <svg
-                      className="w-6 h-6 text-gray-800 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"
-                      />
-                    </svg>
-                  </button>
+
                   <button
                     className="text-white bg-green-600 rounded p-1 hover:underline"
                     onClick={() => handleDownloadPDF(appeal.phone)}

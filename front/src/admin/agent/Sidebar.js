@@ -133,7 +133,7 @@ function Sidebar() {
                 <span className="ms-3">Kelib tushgan arizalar</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/agent/history"
                 onClick={closeSidebarOnMobile}
@@ -154,29 +154,8 @@ function Sidebar() {
                 </svg>
                 <span className="ms-3">Kunlik Faollik</span>
               </Link>
-            </li>
-            <li>
-              <Link
-                to="/agent/transform-education"
-                onClick={closeSidebarOnMobile}
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                <span className="ms-3">O'qishni ko'chirish arizalar</span>
-              </Link>
-            </li>
+            </li> */}
+            
 
             {showCards && (
               <li>

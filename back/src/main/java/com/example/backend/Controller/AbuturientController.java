@@ -95,6 +95,8 @@ public class AbuturientController {
 
         return ResponseEntity.ok(true);
     }
+
+
     @DeleteMapping("/{abuturientId}")
     public HttpEntity<?> deleteAbuturient(@PathVariable UUID abuturientId) {
         abuturientAmocrmRepo.deleteById(abuturientId);

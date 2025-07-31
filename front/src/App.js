@@ -61,8 +61,7 @@ import AppealsAgent from "./admin/agent/Appeals";
 import TestAbuturient from "./pages/home/TestAbuturient";
 import Staff from "./admin/myPages/Staff";
 import AllAppeals from "./admin/agent/AllAppeals";
-import AgentTransformEducation from "./admin/agent/Transform";
-import AgentHistory from "./admin/agent/History";
+// import AgentHistory from "./admin/agent/History";
 import SocialMedia from "./admin/myPages/SocialMedia";
 import MyQRCode from "./admin/myPages/MyQRCode";
 import GoldCard from "./pages/goldCard/GoldCard";
@@ -192,11 +191,8 @@ function App() {
         <Route path={"/agent/home"} element={<AdminHomeAgent />} />
         <Route path={"/agent/vaucher"} element={<QRCodeAgent />} />
         <Route path={"/agent/appeals"} element={<AppealsAgent />} />
-        <Route path={"/agent/history"} element={<AgentHistory />} />
-        <Route
-          path={"/agent/transform-education"}
-          element={<AgentTransformEducation />}
-        />
+        {/* <Route path={"/agent/history"} element={<AgentHistory />} /> */}
+
         <Route path={"/agent/all-appeals"} element={<AllAppeals />} />
       </Routes>
     </div>
