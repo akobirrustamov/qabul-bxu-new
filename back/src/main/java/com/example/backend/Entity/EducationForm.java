@@ -19,6 +19,7 @@ public class EducationForm {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Specifies auto-increment behavior
     private Integer id;
     private String name;
+    private String description;
     @ManyToOne
     private EducationType educationType;
     private Boolean isActive;

@@ -386,11 +386,11 @@ public class AutoRun implements CommandLineRunner {
     }
     private void saveEducationForm() {
         educationFormRepo.saveAll(List.of(
-                new EducationForm(1, "Kunduzgi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
-                new EducationForm(2, "Sirtqi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
-                new EducationForm(3, "Masofaviy", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
-                new EducationForm(4, "Kechgi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
-                new EducationForm(5, "Kunduzgi", educationTypeRepo.findById(2).orElseThrow(), true, LocalDateTime.now())
+                new EducationForm(1, "Kunduzgi","Kunduzgi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
+                new EducationForm(2, "Sirtqi","Sirtqi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
+                new EducationForm(3, "Masofaviy","Masofaviy", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
+                new EducationForm(4, "Kechgi","Kechgi", educationTypeRepo.findById(1).orElseThrow(), true, LocalDateTime.now()),
+                new EducationForm(5, "Kunduzgi","Kunduzgi", educationTypeRepo.findById(2).orElseThrow(), true, LocalDateTime.now())
 //                new EducationForm(6, "Masofaviy", educationTypeRepo.findById(2).orElseThrow(), true, LocalDateTime.now())
         ));
     }
