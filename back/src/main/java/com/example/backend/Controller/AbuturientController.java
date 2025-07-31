@@ -75,8 +75,7 @@ public class AbuturientController {
     private final TestScoreRepo testScoreRepo;
     private final SmsCodeRepo smsCodeRepo;
     private final SmsCodeService smsCodeService;
-
-
+    private final AbuturientDocumentRepo abuturientDocumentRepo;
     @PostMapping("/isdtm/{id}")
     public ResponseEntity<Boolean> isdtm(@PathVariable UUID id, @RequestBody Map<String, Boolean> request) {
         Optional<Abuturient> abuturientOpt = abuturientRepo.findById(id);
@@ -103,6 +102,7 @@ public class AbuturientController {
         historyOfAbuturientRepo.deleteByAbuturientId(abuturientId);
         historyRepo.deleteByAbuturientId(abuturientId);
         testScoreRepo.deleteByAbuturientId(abuturientId);
+        abuturientDocumentRepo.deleteByAbuturientId(abuturientId);
         abuturientRepo.deleteById(abuturientId);
         return new HttpEntity<>(HttpStatus.OK);
     }

@@ -34,6 +34,9 @@ public class EducationFormController {
     }
 
 
+
+
+
     @GetMapping("/{id}")
     public HttpEntity<?> getEducationFormById(@PathVariable Integer id) {
         List<EducationForm> byId = educationFormRepo.findByEducationTypeId(id);
@@ -49,7 +52,6 @@ public class EducationFormController {
     @PostMapping
     public HttpEntity<?> addEducationForm(@RequestBody EducationFormDTO educationFormDTO) {
         EducationForm educationForm = new EducationForm(
-                null,
                 educationFormDTO.getName(),
                 educationTypeRepo.findById(educationFormDTO.getEducationTypeId()).orElseThrow(() -> new RuntimeException("EducationType not found")),
                 true, // Default to active
@@ -78,6 +80,18 @@ public class EducationFormController {
         return ResponseEntity.ok("EducationForm updated successfully");
     }
 
+    @PutMapping("/description/{educationFormId}/{description}")
+    public HttpEntity<?> postEducationFormDescription(@PathVariable Integer educationFormId, @PathVariable String description) {
+        Optional<EducationForm> optionalEducationForm = educationFormRepo.findById(educationFormId);
+
+        if (optionalEducationForm.isEmpty()) {
+            return ResponseEntity.status(404).body("EducationForm not found");
+        }
+        EducationForm educationForm = optionalEducationForm.get();
+        educationForm.setDescription(description);
+        educationFormRepo.save(educationForm);
+        return ResponseEntity.ok("EducationForm updated successfully");
+    }
     // Delete EducationForm by ID
     @DeleteMapping("/{id}")
     public HttpEntity<?> deleteEducationForm(@PathVariable Integer id) {
