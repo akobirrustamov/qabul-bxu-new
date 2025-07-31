@@ -12,6 +12,7 @@ const EducationForm = () => {
         id: null,
         name: "",
         educationTypeId: "",
+        description: "",
         isActive: true,
     });
 
@@ -47,8 +48,10 @@ const EducationForm = () => {
     const handleFormSubmit = async () => {
         try {
             if (formValues.id) {
+                console.log("Updating existing form with ID:", formValues);
                 // Update existing form
                 await ApiCall(`/api/v1/education-form/${formValues.id}`, "PUT", formValues, null, true);
+                await ApiCall(`/api/v1/education-form/description/${formValues.id}/${formValues.description}`, "PUT", null, null, true);
             } else {
                 // Add new form
                 await ApiCall("/api/v1/education-form", "POST", formValues, null, true);
@@ -108,41 +111,45 @@ const EducationForm = () => {
                 <div className="mt-6">
                     <table className="min-w-full table-auto border-collapse border border-gray-300">
                         <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border border-gray-300 px-4 py-2">N%</th>
-                            <th className="border border-gray-300 px-4 py-2">Name</th>
-                            <th className="border border-gray-300 px-4 py-2">Education Type</th>
-                            <th className="border border-gray-300 px-4 py-2">Is Active</th>
-                            <th className="border border-gray-300 px-4 py-2">Actions</th>
-                        </tr>
+                            <tr className="bg-gray-200">
+                                <th className="border border-gray-300 px-4 py-2">N%</th>
+                                <th className="border border-gray-300 px-4 py-2">Name</th>
+                                <th className="border border-gray-300 px-4 py-2">Education Type</th>
+                                <th className="border border-gray-300 px-4 py-2">Description</th>
+                                <th className="border border-gray-300 px-4 py-2">Is Active</th>
+                                <th className="border border-gray-300 px-4 py-2">Actions</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {educationForms.map((form, index) => (
-                            <tr key={form.id}>
-                                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                                <td className="border border-gray-300 px-4 py-2">{form.name}</td>
-                                <td className="border border-gray-300 px-4 py-2">
-                                    {form.educationType.name}
-                                </td>
-                                <td className="border border-gray-300 px-4 py-2">
-                                    {form.isActive ? "Yes" : "No"}
-                                </td>
-                                <td className="border border-gray-300 px-4 py-2">
-                                    <button
-                                        className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                        onClick={() => handleEdit(form)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="bg-red-500 text-white px-2 py-1 rounded"
-                                        onClick={() => handleDelete(form.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                            {educationForms.map((form, index) => (
+                                <tr key={form.id}>
+                                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                                    <td className="border border-gray-300 px-4 py-2">{form.name}</td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {form.educationType.name}
+                                    </td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {form.description}
+                                    </td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {form.isActive ? "Yes" : "No"}
+                                    </td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        <button
+                                            className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                                            onClick={() => handleEdit(form)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="bg-red-500 text-white px-2 py-1 rounded"
+                                            onClick={() => handleDelete(form.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -175,6 +182,15 @@ const EducationForm = () => {
                             </option>
                         ))}
                     </select>
+                    <input
+                        type="text"
+                        name="description"
+                        value={formValues.description}
+                        onChange={handleInputChange}
+                        placeholder="Description"
+                        className="border border-gray-300 px-4 py-2 rounded"
+                        required
+                    />
                     <div className="flex items-center space-x-2">
                         <label>Is Active</label>
                         <input

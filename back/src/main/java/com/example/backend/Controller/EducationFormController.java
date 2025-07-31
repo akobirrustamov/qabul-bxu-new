@@ -82,6 +82,8 @@ public class EducationFormController {
 
     @PutMapping("/description/{educationFormId}/{description}")
     public HttpEntity<?> postEducationFormDescription(@PathVariable Integer educationFormId, @PathVariable String description) {
+        System.out.println(description);
+        System.out.println(educationFormId);
         Optional<EducationForm> optionalEducationForm = educationFormRepo.findById(educationFormId);
 
         if (optionalEducationForm.isEmpty()) {
