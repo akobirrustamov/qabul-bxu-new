@@ -160,7 +160,7 @@ public class TestController {
                 String template = (String) ((Map) ((java.util.List) templatesResponse.get("result")).get(1)).get("template");
 
                 String dynamicUrl = "https://qabul.bxu.uz/api/v1/abuturient/contract/" + phone;
-                String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", phone);
+                String finalMessage = template.replace("%w", dynamicUrl).replace("%d{1,3}", "+998553099999");
 
                 String smsUrl = "https://notify.eskiz.uz/api/message/sms/send";
                 Map<String, String> smsPayload = new HashMap<>();
